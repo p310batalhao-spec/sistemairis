@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório ÍRIS - PMAL</title>
+    <style>
+        @page {
+            size: landscape;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 10px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: space-between;
+            background: #eee;
+            padding: 8px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid #999;
+            padding: 5px;
+            text-align: left;
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+            font-size: 9px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .no-print {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        .btn-print {
+            padding: 10px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        .footer-relatorio {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            font-size: 10px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print">
+        <button class="btn-print" onclick="window.print()">CONFIRMAR IMPRESSÃO (CTRL + P)</button>
+    </div>
+
+    <div id="conteudo-relatorio">
+        <div class="header">
+            <h1>POLÍCIA MILITAR DE ALAGOAS</h1>
+            <h3>SISTEMA ÍRIS - RELATÓRIO DE ASSISTIDAS</h3>
+            <p id="txt-filtro"></p>
+        </div>
+
+        <div class="meta-info" id="meta-info">
+        </div>
+
+        <table id="tabela-relatorio">
+            <thead>
+                <tr>
+                    <th style="width: 150px;">NOME</th>
+                    <th style="width: 80px;">CPF</th>
+                    <th style="width: 80px;">TELEFONE</th>
+                    <th style="width: 100px;">CIDADE</th>
+                    <th style="width: 100px;">VARA</th>
+                    <th style="width: 80px;">STATUS</th>
+                    <th style="width: 70px;">INÍCIO MPU</th>
+                    <th style="width: 70px;">FIM MPU</th>
+                    <th>ENDEREÇO</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-relatorio"></tbody>
+        </table>
+    </div>
+    <footer class="footer-relatorio">
+        <p>
+            Seção de Planejamento, Instrução e Estatística - P3
+        </p>
+        <p>
+            Relatório gerado pelo Sistema ÍRIS - Polícia Militar de Alagoas em: <span id="data-geracao"></span>
+        </p>
+    </footer>
+
+    <script>
+        window.onload = function () {
+            const rawData = localStorage.getItem('dadosRelatorio');
+            if (!rawData) {
+                document.body.innerHTML = "<h1>Erro: Nenhum dado encontrado para o relatório.</h1>";
+                return;
+            }
+
+            const info = JSON.parse(rawData);
+
+            // Preenche Cabeçalho
+            document.getElementById('txt-filtro').innerText = `ASSISTIDAS CADASTRADAS POR FILTRO: ${info.filtro.toUpperCase()}`;
+            document.getElementById('meta-info').innerHTML = `
+                <div><b>DATA:</b> ${info.data}</div>
+                <div><b>STATUS:</b> ${info.status}</div>
+                <div><b>OPERADOR:</b> ${info.operador}</div>
+                <div><b>UNIDADE:</b> ${info.unidade}</div>
+            `;
+
+            // Preenche Tabela
+            const tbody = document.getElementById('corpo-relatorio');
+            info.dados.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${item.NOME || '-'}</b></td>
+                    <td>${item.CPF || '-'}</td>
+                    <td>${item.TELEFONE || '-'}</td>
+                    <td>${item.CIDADE || '-'}</td>
+                    <td>${item.VARA || '-'}</td>
+                    <td style="font-weight:bold">${item.STATUS || '-'}</td>
+                    <td>${item.DATA_INICIO_MPU || '-'}</td>
+                    <td>${item.DATA_TERMINO_MPU || '-'}</td>
+                    <td>${item.ENDERECO || '-'}, ${item.BAIRRO || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR') + " às " + agora.toLocaleTimeString('pt-BR');
+            document.getElementById('data-geracao').innerText = dataFormatada;
+
+            // Opcional: Aciona impressão automaticamente
+            // setTimeout(() => { window.print(); }, 500);
+        };
+    </script>
+</body>
+
+</html>

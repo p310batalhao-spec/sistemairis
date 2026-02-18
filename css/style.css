@@ -1,0 +1,215 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem;
+    border-bottom: solid 1px blueviolet;
+}
+
+.header-info-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+/* Novo estilo para o Relógio/Data */
+#relogio {
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+    line-height: 1.4;
+    padding-left: 1.25rem;
+    padding-bottom: 0rem;
+    margin-bottom: 0rem;
+    /* Adiciona um pequeno padding para garantir a distância da borda */
+}
+
+.brasao {
+    height: 3.5rem;
+}
+
+.cabecalho {
+    text-align: left;
+}
+
+.cabecalho h1 {
+    color: blueviolet;
+    font-size: 1.875rem;
+}
+
+.cabecalho h3 {
+    color: rgb(168, 168, 168);
+    font-size: 20px;
+}
+
+.pagecomplete {
+    display: flex;
+    /* Coloca nav e section lado a lado */
+    align-items: flex-start;
+    /* Alinha o topo dos elementos */
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    /* Ajusta a altura descontando o header */
+    height: 100vh;
+}
+
+/* Ajuste nos links para ficarem em linha */
+.navegacao a {
+    display: flex;
+    align-items: center;
+    /* Alinha verticalmente ao centro */
+    gap: 1rem;
+    /* Espaço entre o ícone e o texto */
+    color: #333;
+    /* Cor do texto (ajuste como preferir) */
+    width: 100%;
+    padding: 5px 0;
+}
+
+/* Garante que a imagem tenha um tamanho fixo para não "tremer" na animação */
+.navegacao a img {
+    flex-shrink: 0;
+}
+
+/* Estilização do texto para que ele apareça suavemente */
+.navegacao p {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Mostra o texto quando o menu expande */
+.navegacao:hover p {
+    opacity: 1;
+}
+
+.navegacao p img {
+    display: none;
+}
+
+.navegacao {
+    display: flex;
+    flex-direction: column;
+    width: 4.5rem;
+    padding-top: 2.5rem;
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+    padding-bottom: 3.75rem;
+    gap: 1.25rem;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: white;
+    box-shadow: 0.125rem 0 0.313rem rgba(0, 0, 0, 0.1);
+    height: 100%;
+    transition: 0.3s;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.navegacao:hover {
+    width: 15.625rem;
+}
+
+.controle_cards {
+    flex: 1;
+    /* Faz os cards ocuparem todo o espaço restante */
+    padding: 2rem;
+    /* Espaçamento interno */
+    display: flex;
+    /* Ou use 'grid' se preferir */
+    flex-wrap: wrap;
+    /* Se não couberem na linha, eles pulam para baixo */
+    gap: 1.5rem;
+    /* Espaço entre um card e outro */
+    justify-content: center;
+    /* Centraliza os cards no espaço disponível */
+    margin-left: 1%;
+}
+
+.cards {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 200px;
+    /* Largura mínima de cada card */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-top: 4px solid blueviolet;
+    /* Detalhe para combinar com o header */
+}
+
+.cards {
+    display: flex;
+    gap: 20px;
+}
+
+.cards_nome {
+    display: flex;
+    flex-direction: column;
+}
+
+.cards .numero {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+}
+
+footer {
+    display: flex;
+    flex-direction: column;
+    align-items: first baseline;
+    background: rgb(84, 84, 84);
+    color: white;
+    padding: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    text-align: center;
+}
+
+.navegacao a {
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.navegacao a.active {
+    /* Usa o mesmo gradiente do cabeçalho */
+    background: blueviolet;
+    color: white;
+    /* Texto branco para contraste */
+    font-weight: bold;
+    transform: none;
+}
+
+/* Filtro CSS para tentar inverter/tonalizar o ícone para branco no estado ativo */
+.navegacao a.active img {
+    filter: brightness(0) invert(1);
+}
+
+.navegacao a:hover {
+    background-color: rgb(233, 233, 233);
+    color: black;
+    transform: scale(1.05);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.navegacao a.active:hover {
+    /* Sobrescreve o hover para manter o estilo ativo no item selecionado */
+    background: blueviolet;
+    color: white;
+    transform: none;
+}
+
+.cabecalho-geral {
+    display: flex;
+    justify-content: space-around;
+}
