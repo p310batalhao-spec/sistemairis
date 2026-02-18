@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso | Central Íris PMAL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+
+<body class="login-page-body">
+
+    <div class="login-container">
+        <div class="login-header">
+            <img src="/img/brasao.png" alt="Brasão PMAL" onerror="this.src='https://via.placeholder.com/90?text=PMAL'">
+            <h2 id="form-title">CENTRAL ÍRIS</h2>
+            <h3>Monitoramento de Botão do Pânico - 10º BPM</h3>
+        </div>
+
+        <div id="mensagem"></div>
+
+        <form id="login-form">
+            <div class="input-group">
+                <label>CPF (Usuário)</label>
+                <input type="text" id="user-cpf" placeholder="Apenas números" required>
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" id="user-pass" placeholder="******" required>
+            </div>
+            <button type="submit" class="btn-acesso" id="btn-login">ENTRAR NO SISTEMA</button>
+        </form>
+
+        <form id="cadastro-form" class="form-hidden">
+            <div class="input-group">
+                <label>Graduação</label>
+                <select id="reg-grad" required>
+                    <option value="">Selecione...</option>
+                    <option value="SD">SD</option>
+                    <option value="CB">CB</option>
+                    <option value="SGT">SGT</option>
+                    <option value="TEN">TEN</option>
+                    <option value="CAP">CAP</option>
+                    <option value="MAJ">MAJ</option>
+                    <option value="TC">TEN CEL</option>
+                    <option value="CEL">CEL</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Nome Completo</label>
+                <input type="text" id="reg-nome" placeholder="Nome para o registro" required>
+            </div>
+            <div class="input-group">
+                <label>Nome de Guerra</label>
+                <input type="text" id="reg-nome-guerra" placeholder="Ex: Sgt Silva" required>
+            </div>
+            <div class="input-group">
+                <label>UNIDADE</label>
+                <select id="reg-unidade" required>
+                    <option value="">Selecione a Unidade</option>
+                    <option value="1º BATALHÃO DE POLÍCIA MILITAR">1º BPM</option>
+                    <option value="1ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">1ª CPMI</option>
+                    <option value="10º BATALHÃO DE POLÍCIA MILITAR">1Oº BPM</option>
+                    <option value="2º BATALHÃO DE POLÍCIA MILITAR">2º BPM</option>
+                    <option value="2ª COMPANHIA DE POLÍCIA MILITAR">2ª CPMI</option>
+                    <option value="3º BATALHÃO DE POLÍCIA MILITAR">3ª CPMI</option>
+                    <option value="3ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">3ª CPMI</option>
+                    <option value="4º BATALHÃO DE POLÍCIA MILITAR">4ª CPMI</option>
+                    <option value="4ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">4ª CPMI</option>
+                    <option value="5º BATALHÃO DE POLÍCIA MILITAR">5º BPM</option>
+                    <option value="5ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE"></option>
+                    <option value="6º BATALHÃO DE POLÍCIA MILITAR">6º BPM</option>
+                    <option value="6ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">6ª CPMI</option>
+                    <option value="7º BATALHÃO DE POLÍCIA MILITAR">7º BPM</option>
+                    <option value="7ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">7ª CPMI</option>
+                    <option value="8º BATALHÃO DE POLÍCIA MILITAR INDEPENDENTE">8º BPM</option>
+                    <option value="8ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">8ª CPMI</option>
+                    <option value="9º BATALHÃO DE POLÍCIA MILITAR INDEPENDENTE">9º BPM</option>
+                    <option value="9ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">9ª CPMI</option>
+                    <option value="11º BATALHÃO DE POLÍCIA MILITAR">11º BPM</option>
+                    <option value="11ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">11ª CPMI</option>
+                    <option value="12º BATALHÃO DE POLÍCIA MILITAR">12º BPM</option>
+                    <option value="12ª COMPANHIA DE POLÍCIA MILITAR INDEPENDENTE">12ª CPMI</option>
+                    <option value="13º BATALHÃO DE POLÍCIA MILITAR">13º BPM</option>
+                    <option value="14º BATALHÃO DE POLÍCIA MILITAR">14º BPM</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>CPF (Apenas números)</label>
+                <input type="text" id="reg-cpf" placeholder="Seu usuário" required>
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" required>
+            </div>
+            <div class="input-group">
+                <label>Confirme a Senha</label>
+                <input type="password" id="reg-pass-confirm" placeholder="Repita a senha" required>
+            </div>
+            <button type="submit" class="btn-acesso" id="btn-cad">SOLICITAR CADASTRO</button>
+        </form>
+
+        <div class="login-footer">
+            <a href="#" id="toggle-form" class="toggle-link">Não tem conta? Cadastre-se!</a>
+        </div>
+    </div>
+
+    <script>
+        // URL DO SEU WEB APP (Certifique-se de que é a versão mais recente do Deploy)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOOpkLil54PK30v38hfguEPLGVHpsYCxUjsdsjVmbEf4rFDSUZjJiPPBhhwJcJJyG6/exec";
+
+        const loginForm = document.getElementById('login-form');
+        const cadastroForm = document.getElementById('cadastro-form');
+        const toggleLink = document.getElementById('toggle-form');
+        const formTitle = document.getElementById('form-title');
+        const msgDiv = document.getElementById('mensagem');
+
+        // Alternar entre Login e Cadastro
+        toggleLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isLogin = cadastroForm.classList.contains('form-hidden');
+            if (isLogin) {
+                cadastroForm.classList.remove('form-hidden');
+                loginForm.classList.add('form-hidden');
+                formTitle.innerText = "CADASTRO ÍRIS";
+                toggleLink.innerText = "Já tem conta? Faça Login";
+            } else {
+                cadastroForm.classList.add('form-hidden');
+                loginForm.classList.remove('form-hidden');
+                formTitle.innerText = "CENTRAL ÍRIS";
+                toggleLink.innerText = "Não tem conta? Cadastre-se!";
+            }
+            msgDiv.style.display = 'none';
+        });
+
+        function exibirAviso(texto, tipo) {
+            msgDiv.innerText = texto;
+            msgDiv.className = tipo === 'erro' ? 'erro' : 'sucesso';
+            msgDiv.style.display = 'block';
+        }
+
+        // ==========================================
+        // LÓGICA DE LOGIN (CORRIGIDA)
+        // ==========================================
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Captura os valores corretamente dos IDs do seu HTML
+            const cpfParaLogin = document.getElementById('user-cpf').value;
+            const senhaParaLogin = document.getElementById('user-pass').value;
+
+            const btn = loginForm.querySelector('button');
+            btn.disabled = true;
+            btn.innerText = 'AUTENTICANDO...';
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'login',
+                        usuario: cpfParaLogin, // Enviando para o AppScript
+                        senha: senhaParaLogin
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // SALVANDO NO LOCALSTORAGE
+                    localStorage.setItem('usuarioLogado', 'true');
+                    localStorage.setItem('usuarioCPF', cpfParaLogin);
+                    localStorage.setItem('usuarioNome', result.nome || "Usuário");
+                    localStorage.setItem('usuarioUnidade', result.unidade || "PMAL");
+
+                    // CORREÇÃO DO INDEFINIDO: 
+                    // Se result.graduacao não existir no retorno do seu Google Script, 
+                    // ele salvará uma string vazia em vez de "undefined"
+                    localStorage.setItem('usuarioGraduacao', result.graduacao || "");
+
+                    window.location.href = 'index.html';
+                } else {
+                    exibirAviso(result.message, "erro");
+                    btn.disabled = false;
+                    btn.innerText = "ENTRAR NO SISTEMA";
+                }
+            } catch (error) {
+                console.error("Erro no login:", error);
+                exibirAviso("Erro ao conectar com o servidor.", "erro");
+                btn.disabled = false;
+                btn.innerText = "ENTRAR NO SISTEMA";
+            }
+        });
+
+        // ==========================================
+        // LÓGICA DE CADASTRO
+        // ==========================================
+        cadastroForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const senha = document.getElementById('reg-pass').value;
+            const confirma = document.getElementById('reg-pass-confirm').value;
+            const unidadeElement = document.getElementById('reg-unidade'); // Verifica se existe
+
+            if (!unidadeElement) {
+                exibirAviso("Erro interno: Campo unidade não encontrado no HTML.", "erro");
+                return;
+            }
+
+            if (senha !== confirma) {
+                exibirAviso("As senhas não coincidem!", "erro");
+                return;
+            }
+
+            const btn = document.getElementById('btn-cad');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cadastrando...';
+
+            const payload = {
+                action: 'cadastrar',
+                graduacao: document.getElementById('reg-grad').value,
+                nome: document.getElementById('reg-nome').value,
+                nomeGuerra: document.getElementById('reg-nome-guerra').value,
+                unidade: unidadeElement.value,
+                usuario: document.getElementById('reg-cpf').value,
+                senha: senha
+            };
+
+            try {
+                // REMOVIDO 'no-cors' para que o JS consiga ler a resposta de sucesso/erro
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    exibirAviso("Cadastro realizado com sucesso!", "sucesso");
+                    setTimeout(() => { location.reload(); }, 2000);
+                } else {
+                    exibirAviso(result.message, "erro");
+                    btn.disabled = false;
+                    btn.innerText = "SOLICITAR CADASTRO";
+                }
+            } catch (error) {
+                console.error(error);
+                exibirAviso("Erro ao conectar com o servidor.", "erro");
+                btn.disabled = false;
+                btn.innerText = "SOLICITAR CADASTRO";
+            }
+        });
+    </script>
+</body>
+
+</html>

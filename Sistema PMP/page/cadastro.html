@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema PMP/PMAL | CADASTRO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/stylesindex.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/cadastro.css">
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon">
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+</head>
+
+<body>
+    <header>
+        <section class="cabecalho-geral"
+            style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="header-info-left">
+                <img class="brasao" src="/img/brasao.png" alt="brasao">
+                <div class="cabecalho">
+                    <h1>CENTRAL DE MONITORAMENTO ÍRIS</h1>
+                    <h3>POLÍCIA MILITAR DE ALAGOAS</h3>
+                    <h3>CENTRAL DE OPERAÇÕES DA POLÍCIA MILITAR - COPOM</h3>
+                    <h3 id="unidade">--</h3>
+                </div>
+            </div>
+            <div class="header-info-right" style="text-align: right; padding-right: 50px;">
+                <div style="color: blueviolet; font-weight: bold;"><i class="fas fa-user-shield"></i> Operador: <span
+                        id="nome-operador">---</span></div>
+                <div id="relogio" style="color: #555; font-weight: bold; font-size: 1.1rem;"><span
+                        id="current-date-time"></span></div>
+            </div>
+        </section>
+    </header>
+    <section class="pagecomplete">
+        <nav class="navegacao">
+            <div class="nav-links">
+                <a href="index.html">
+                    <img width="30" height="30" src="https://img.icons8.com/material-outlined/24/home--v2.png"
+                        alt="home" />
+                    <p>Home</p>
+                </a>
+                <a href="fiscalizacaohome.html">
+                    <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/policeman-female.png"
+                        alt="policeman-female" />
+                    <p>Fiscalização</p>
+                </a>
+            </div>
+
+            <a href="javascript:void(0)" onclick="logout()"
+                style="color: #d9534f; border-top: 1px solid #eee; padding-top: 15px;">
+                <i class="fas fa-sign-out-alt" style="font-size: 24px;"></i>
+                <p>Sair</p>
+            </a>
+        </nav>
+
+        <main class="container-tabela">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: blueviolet;"><i class="fas fa-users"></i> Gerenciamento de Assistidas</h2>
+                <button class="btn-adicionar" onclick="abrirModalDossie()"
+                    style="background-color: #27ae60; margin-left: 10px;">
+                    <i class="fas fa-id-card"></i> Dossiê da Assistida
+                </button>
+
+                <div id="modal-dossie" class="sidebar-cadastro"
+                    style="display:none; background: rgba(0,0,0,0.5); width: 100%; height: 100%; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; z-index: 9999;">
+                    <div
+                        style="background: white; padding: 30px; border-radius: 8px; width: 450px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                        <h3 style="color: #27ae60;"><i class="fas fa-search"></i> Gerar Dossiê Unificado</h3>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Selecione uma assistida para
+                            consolidar todos os registros do sistema.</p>
+
+                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Selecione a
+                            Assistida:</label>
+                        <select id="select-dossie" class="grupo-input"
+                            style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px;">
+                            <option value="">Carregando assistidas...</option>
+                        </select>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prepararDossie()" class="btn-salvar"
+                                style="background: #27ae60; flex: 1;">Gerar Relatório</button>
+                            <button onclick="fecharModalDossie()"
+                                style="background:#666; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer; flex: 1;">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="barra-filtros" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <input type="text" id="filtro-nome" placeholder="Buscar por Nome ou CPF..."
+                        oninput="aplicarFiltros()"
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                </div>
+
+                <div style="min-width: 180px;">
+                    <select id="filtro-status" onchange="aplicarFiltros()"
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;">
+                        <option value="TODOS">TODOS OS STATUS</option>
+                        <option value="ATIVO">ATIVO</option>
+                        <option value="MEDIDA ENCERRANDO">MEDIDA ENCERRANDO</option>
+                        <option value="MEDIDA ENCERRADA">MEDIDA ENCERRADA</option>
+                    </select>
+                </div>
+
+                <button onclick="prepararImpressao()" class="btn-imprimir">
+                    <i class="fas fa-print"></i> IMPRIMIR RELATÓRIO
+                </button>
+            </div>
+            </div>
+
+            <div class="tabela-wrapper">
+                <table class="tabela-assistidas">
+                    <thead>
+                        <tr>
+                            <th>NOME</th>
+                            <th>CPF</th>
+                            <th>CIDADE</th>
+                            <th>VARA</th>
+                            <th>STATUS</th>
+                            <th style="text-align:center">AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela-firebase">
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </section>
+
+    <div id="sidebar-cadastro" class="sidebar-cadastro">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h3 id="titulo-sidebar">Novo Cadastro</h3>
+                <button onclick="fecharSidebar()" class="btn-fechar-sidebar">&times;</button>
+            </div>
+
+            <form id="form-cadastro-assistida">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>ID ASSISTIDA (Automático)</label>
+                    <input type="text" id="ID_ASSISTIDA" readonly style="background: #f0f0f0; font-weight: bold;">
+                </div>
+
+                <div class="form-group"><label>Nome Completo</label><input type="text" id="NOME" required></div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>RG</label><input type="text" id="RG"></div>
+                    <div class="form-group"><label>CPF</label><input type="text" id="CPF" required></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Idade</label><input type="number" id="IDADE"></div>
+                    <div class="form-group"><label>Data Nascimento</label><input type="date" id="DATA_NASCIMENTO"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Nome da Mãe</label><input type="text" id="MAE"></div>
+                    <div class="form-group"><label>Nome do Pai</label><input type="text" id="PAI"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Telefone</label><input type="text" id="TELEFONE"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="EMAIL"></div>
+                </div>
+
+                <div class="form-group"><label>Endereço</label><input type="text" id="ENDERECO"></div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Bairro</label><input type="text" id="BAIRRO"></div>
+                    <div class="form-group"><label>Cidade</label><input type="text" id="CIDADE"></div>
+                </div>
+
+                <div class="form-group"><label>Ponto de Referência</label><input type="text" id="PONTO_REF"></div>
+
+                <hr style="margin: 15px 0;">
+
+                <div class="form-row">
+                    <div class="form-group"><label>Vara</label><input type="text" id="VARA"></div>
+                    <div class="form-group"><label>MPU</label><input type="text" id="MPU"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Início MPU</label><input type="date" id="DATA_INICIO_MPU"></div>
+                    <div class="form-group"><label>Término MPU</label><input type="date" id="DATA_TERMINO_MPU"></div>
+                </div>
+
+                <hr style="margin: 15px 0;">
+
+                <div class="form-group"><label>Nome do Indiciado (Autor)</label><input type="text" id="INDICIADO"></div>
+                <div class="form-group"><label>Endereço Autor</label><input type="text" id="ENDERECO_AUTOR"></div>
+                <div class="form-group"><label>Cidade Autor</label><input type="text" id="CIDADE_AUTOR"></div>
+
+                <hr style="margin: 15px 0;">
+
+                <div class="form-row">
+                    <div class="form-group"><label>Tipo</label><select name="PERIODICIDADE" id="PERIODICIDADE">
+                            <option value="">Selecione o tipo</option>
+                            <option value="MEDIDA PROTETIVA DE URGÊNCIA">MEDIDA PROTETIVA DE URGÊNCIA</option>
+                        </select></div>
+                    <div class="form-group">
+                        <label>Periodicidade</label>
+                        <select id="PERIODICIDADE">
+                            <option value="DIÁRIO">DIÁRIO</option>
+                            <option value="SEMANAL">SEMANAL</option>
+                            <option value="MENSAL">MENSAL</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status (Calculado Automaticamente)</label>
+                        <input type="text" id="STATUS" disabled
+                            style="background: #eee; cursor: not-allowed; font-weight: bold;">
+                    </div>
+                    <div class="form-group"><label>Link PDF (Drive)</label><input type="text" id="UPLOAD_PDF"></div>
+                </div>
+
+                <button type="submit" class="btn-salvar">
+                    SALVAR CADASTRO
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <h4>Seção de Planejamento, Instrução e Estatística - P3/10ºBPM</h4>
+        <h4>Patrulha Maria da Penha - 10ºBPM</h4>
+    </footer>
+    <script>
+        // --- CONFIGURAÇÃO FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "Sbd198a81a91303317a03499f9fcb146d34e935d4Y",
+            authDomain: "botpanico.firebaseapp.com",
+            databaseURL: "https://botpanico-6346c-default-rtdb.firebaseio.com/",
+            projectId: "botpanico-6346c"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- VARIÁVEIS GLOBAIS ---
+        let dadosLocais = {};
+        let listaFiltradaAtual = []; // Mantém a lista que está na tela no momento
+
+        // --- FUNÇÕES DE INTERFACE ---
+        function abrirSidebar() {
+            const form = document.getElementById('form-cadastro-assistida');
+            form.reset();
+            document.getElementById('titulo-sidebar').innerText = "Novo Cadastro";
+
+            // GERAÇÃO DO ID AUTOMÁTICO
+            const agora = new Date();
+            const idGerado = "IRIS" + agora.getFullYear() +
+                String(agora.getMonth() + 1).padStart(2, '0') +
+                String(agora.getDate()).padStart(2, '0') +
+                String(agora.getHours()).padStart(2, '0') +
+                String(agora.getMinutes()).padStart(2, '0') +
+                String(agora.getSeconds()).padStart(2, '0');
+
+            document.getElementById('ID_ASSISTIDA').value = idGerado;
+            document.getElementById('STATUS').value = "ATIVO";
+            document.getElementById('sidebar-cadastro').style.width = "450px";
+        }
+
+        function fecharSidebar() {
+            document.getElementById('sidebar-cadastro').style.width = "0";
+        }
+
+        // --- LÓGICA DE CÁLCULO DE STATUS AUTOMÁTICO ---
+        function calcularStatusMPU(dataInicio, dataTermino) {
+            if (!dataInicio || !dataTermino) return "ATIVO";
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const dataFim = new Date(dataTermino);
+            dataFim.setHours(0, 0, 0, 0);
+
+            const diffTempo = dataFim - hoje;
+            const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+
+            if (diffDias < 0) {
+                return "MEDIDA ENCERRADA";
+            } else if (diffDias <= 30) {
+                return "MEDIDA ENCERRANDO";
+            } else {
+                return "ATIVO";
+            }
+        }
+
+        // --- CARREGAR DADOS DO FIREBASE ---
+        function carregarTabela() {
+            const tbody = document.getElementById('corpo-tabela-firebase');
+
+            db.ref('assistidas').on('value', (snapshot) => {
+                dadosLocais = snapshot.val() || {};
+
+                // Verificação Diária Silenciosa
+                Object.keys(dadosLocais).forEach(id => {
+                    const a = dadosLocais[id];
+                    const statusCorreto = calcularStatusMPU(a.DATA_INICIO_MPU, a.DATA_TERMINO_MPU);
+                    if (a.STATUS !== statusCorreto) {
+                        db.ref(`assistidas/${id}/STATUS`).set(statusCorreto);
+                    }
+                });
+
+                aplicarFiltros();
+            }, (error) => {
+                console.error("Erro no Firebase:", error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>';
+            });
+        }
+
+        // --- FILTRO E ORDENAÇÃO ---
+        function aplicarFiltros() {
+            const tbody = document.getElementById('corpo-tabela-firebase');
+            const termoBusca = document.getElementById('filtro-nome').value.toLowerCase();
+            const statusFiltro = document.getElementById('filtro-status').value;
+
+            tbody.innerHTML = "";
+
+            // Transforma os dados do Firebase em Array
+            let lista = Object.keys(dadosLocais).map(id => ({ id, ...dadosLocais[id] }));
+
+            // Aplica os filtros
+            lista = lista.filter(item => {
+                const matchNome = (item.NOME || "").toLowerCase().includes(termoBusca) || (item.CPF || "").includes(termoBusca);
+                const matchStatus = statusFiltro === "TODOS" || item.STATUS === statusFiltro;
+                return matchNome && matchStatus;
+            });
+
+            // Ordenação
+            const pesoStatus = { "ATIVO": 1, "MEDIDA ENCERRANDO": 2, "MEDIDA ENCERRADA": 3 };
+            lista.sort((a, b) => (pesoStatus[a.STATUS] || 99) - (pesoStatus[b.STATUS] || 99));
+
+            listaFiltradaAtual = lista;
+
+            lista.forEach(item => {
+                const classe = item.STATUS === 'ATIVO' ? 'status-ativo' :
+                    (item.STATUS === 'MEDIDA ENCERRANDO' ? 'status-encerrando' : 'status-encerrada');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.NOME || '-'}</td>
+                    <td>${item.CPF || '-'}</td>
+                    <td>${item.CIDADE || '-'}</td>
+                    <td>${item.VARA || '-'}</td>
+                    <td><span class="status-badge ${classe}">${item.STATUS || 'ATIVO'}</span></td>
+                    <td style="text-align:center">
+                        <button class="btn-edit-tabela" onclick="preencherParaEditar('${item.id}')"><i class="fas fa-edit"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function prepararImpressao() {
+            if (listaFiltradaAtual.length === 0) {
+                alert("Não há dados para imprimir com os filtros selecionados.");
+                return;
+            }
+
+            const relatorioInfo = {
+                filtro: document.getElementById('filtro-nome').value || "GERAL",
+                status: document.getElementById('filtro-status').value,
+                operador: localStorage.getItem('usuarioNome') || "Não Identificado",
+                unidade: localStorage.getItem('usuarioUnidade') || "PMAL",
+                data: new Date().toLocaleString('pt-BR'),
+                dados: listaFiltradaAtual
+            };
+
+            localStorage.setItem('dadosRelatorio', JSON.stringify(relatorioInfo));
+            window.open('/relatorios/assistidas_geral.html', '_blank'); // Removida a pasta /relatorios/ se o arquivo estiver na raiz
+        }
+
+        // --- SALVAR/ATUALIZAR ---
+        document.getElementById('form-cadastro-assistida').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById('ID_ASSISTIDA').value;
+            const dataIni = document.getElementById('DATA_INICIO_MPU').value;
+            const dataFim = document.getElementById('DATA_TERMINO_MPU').value;
+
+            const statusCalculado = calcularStatusMPU(dataIni, dataFim);
+
+            const dados = {
+                ID_ASSISTIDA: id,
+                NOME: document.getElementById('NOME').value,
+                RG: document.getElementById('RG').value,
+                CPF: document.getElementById('CPF').value,
+                IDADE: document.getElementById('IDADE').value,
+                MAE: document.getElementById('MAE').value,
+                PAI: document.getElementById('PAI').value,
+                DATA_NASCIMENTO: document.getElementById('DATA_NASCIMENTO').value,
+                ENDERECO: document.getElementById('ENDERECO').value,
+                BAIRRO: document.getElementById('BAIRRO').value,
+                CIDADE: document.getElementById('CIDADE').value,
+                TELEFONE: document.getElementById('TELEFONE').value,
+                VARA: document.getElementById('VARA').value,
+                MPU: document.getElementById('MPU').value,
+                DATA_INICIO_MPU: dataIni,
+                DATA_TERMINO_MPU: dataFim,
+                INDICIADO: document.getElementById('INDICIADO').value,
+                ENDERECO_AUTOR: document.getElementById('ENDERECO_AUTOR').value,
+                CIDADE_AUTOR: document.getElementById('CIDADE_AUTOR').value,
+                TIPO: document.getElementById('TIPO').value,
+                PERIODICIDADE: document.getElementById('PERIODICIDADE').value,
+                STATUS: statusCalculado,
+                EMAIL: document.getElementById('EMAIL').value,
+                UPLOAD_PDF: document.getElementById('UPLOAD_PDF').value,
+                PONTO_REF: document.getElementById('PONTO_REF').value
+            };
+
+            db.ref('assistidas/' + id).set(dados)
+                .then(() => {
+                    alert("Dados salvos com sucesso!");
+                    fecharSidebar();
+                })
+                .catch((error) => alert("Erro ao salvar: " + error));
+        });
+
+        // --- PREENCHER PARA EDITAR (MELHORADO) ---
+        async function preencherParaEditar(id) {
+            try {
+                // Garantimos que estamos pegando a versão mais recente do Firebase para editar
+                const snap = await db.ref(`assistidas/${id}`).once('value');
+                const a = snap.val();
+                if (!a) {
+                    alert("Erro ao localizar dados da assistida.");
+                    return;
+                }
+
+                // Primeiro, abrimos a barra (que já faz o reset)
+                document.getElementById('sidebar-cadastro').style.width = "450px";
+                document.getElementById('titulo-sidebar').innerText = "Editar Assistida";
+
+                // Preenchemos os campos após o reset do abrirSidebar
+                document.getElementById('ID_ASSISTIDA').value = a.ID_ASSISTIDA || id;
+                document.getElementById('NOME').value = a.NOME || "";
+                document.getElementById('RG').value = a.RG || "";
+                document.getElementById('CPF').value = a.CPF || "";
+                document.getElementById('IDADE').value = a.IDADE || "";
+                document.getElementById('MAE').value = a.MAE || "";
+                document.getElementById('PAI').value = a.PAI || "";
+                document.getElementById('DATA_NASCIMENTO').value = a.DATA_NASCIMENTO || "";
+                document.getElementById('ENDERECO').value = a.ENDERECO || "";
+                document.getElementById('BAIRRO').value = a.BAIRRO || "";
+                document.getElementById('CIDADE').value = a.CIDADE || "";
+                document.getElementById('TELEFONE').value = a.TELEFONE || "";
+                document.getElementById('VARA').value = a.VARA || "";
+                document.getElementById('MPU').value = a.MPU || "";
+                document.getElementById('DATA_INICIO_MPU').value = a.DATA_INICIO_MPU || "";
+                document.getElementById('DATA_TERMINO_MPU').value = a.DATA_TERMINO_MPU || "";
+                document.getElementById('INDICIADO').value = a.INDICIADO || "";
+                document.getElementById('ENDERECO_AUTOR').value = a.ENDERECO_AUTOR || "";
+                document.getElementById('CIDADE_AUTOR').value = a.CIDADE_AUTOR || "";
+                document.getElementById('TIPO').value = a.TIPO || "";
+                document.getElementById('PERIODICIDADE').value = a.PERIODICIDADE || "DIÁRIO";
+                document.getElementById('STATUS').value = a.STATUS || "ATIVO";
+                document.getElementById('EMAIL').value = a.EMAIL || "";
+                document.getElementById('UPLOAD_PDF').value = a.UPLOAD_PDF || "";
+                document.getElementById('PONTO_REF').value = a.PONTO_REF || "";
+
+            } catch (error) {
+                console.error("Erro ao preencher edição:", error);
+            }
+        }
+
+        //FUNÇÕES DO DOSSIÊ
+        // Função para abrir o modal e já carregar a lista de assistidas
+        async function abrirModalDossie() {
+            const modal = document.getElementById('modal-dossie');
+            const select = document.getElementById('select-dossie');
+
+            modal.style.display = 'flex';
+            select.innerHTML = '<option value="">Aguarde, carregando...</option>';
+
+            try {
+                const snapshot = await db.ref('assistidas').once('value');
+                select.innerHTML = '<option value="">-- Selecione uma Assistida --</option>';
+
+                const assistidas = [];
+                snapshot.forEach(child => {
+                    assistidas.push({
+                        id: child.key,
+                        nome: child.val().NOME.toUpperCase()
+                    });
+                });
+
+                // Ordenar por nome antes de colocar no select
+                assistidas.sort((a, b) => a.nome.localeCompare(b.nome));
+
+                assistidas.forEach(a => {
+                    select.innerHTML += `<option value="${a.id}">${a.nome}</option>`;
+                });
+            } catch (error) {
+                console.error("Erro ao carregar lista:", error);
+                select.innerHTML = '<option value="">Erro ao carregar dados</option>';
+            }
+        }
+
+        function fecharModalDossie() {
+            document.getElementById('modal-dossie').style.display = 'none';
+        }
+
+        // Função de gerar relatório ajustada para usar o ID do Select
+        async function prepararDossie() {
+            const assistidaId = document.getElementById('select-dossie').value;
+            if (!assistidaId) return alert("Por favor, selecione uma assistida.");
+
+            const snapAssist = await db.ref('assistidas').child(assistidaId).once('value');
+            const assistidaEncontrada = snapAssist.val();
+            if (!assistidaEncontrada) return alert("Erro ao recuperar dados.");
+
+            // Nós a serem pesquisados
+            const nos = ['TermoConsentimento', 'certidoes', 'emergencia', 'encerramento'];
+            const dossieCompleto = {
+                perfil: assistidaEncontrada,
+                registros: {}
+            };
+
+            for (const no of nos) {
+                const snap = await db.ref(no).once('value');
+                dossieCompleto.registros[no] = [];
+
+                snap.forEach(child => {
+                    const dado = child.val();
+
+                    // LÓGICA DE VÍNCULO ESPECÍFICA POR NÓ
+                    if (no === 'emergencia') {
+                        // No nó emergencia, o vínculo é pelo campo ASSISTIDA_LINK
+                        if (dado.ASSISTIDA_LINK === assistidaId) {
+                            dossieCompleto.registros[no].push(dado);
+                        }
+                    } else {
+                        // Nos outros nós, mantém o vínculo por ID ou Nome
+                        if (dado.NOME === assistidaId ||
+                            dado["NOME DA REPESENTANTE"] === assistidaId ||
+                            dado.NOME === assistidaEncontrada.NOME) {
+                            dossieCompleto.registros[no].push(dado);
+                        }
+                    }
+                });
+            }
+
+            localStorage.setItem('dadosDossie', JSON.stringify(dossieCompleto));
+            window.open('/relatorios/relatorio_assistida.html', '_blank');
+            fecharModalDossie();
+        }
+        // --- INICIALIZAÇÃO ÚNICA ---
+        function inicializarSistema() {
+            const h3Unidade = document.getElementById('unidade');
+            const unidadeSalva = localStorage.getItem('usuarioUnidade');
+
+            if (unidadeSalva && unidadeSalva !== "undefined" && unidadeSalva !== "null") {
+                if (h3Unidade) h3Unidade.innerText = unidadeSalva;
+            } else {
+                window.location.replace('login.html');
+                return;
+            }
+
+            const dateTimeSpan = document.getElementById('current-date-time');
+            setInterval(() => {
+                const agora = new Date();
+                const data = agora.toLocaleDateString('pt-BR');
+                const hora = agora.toLocaleTimeString('pt-BR');
+                if (dateTimeSpan) dateTimeSpan.innerText = data + " | " + hora;
+            }, 1000);
+
+            const nome = localStorage.getItem('usuarioNome');
+            if (nome) {
+                const elNome = document.getElementById('nome-operador');
+                if (elNome) elNome.innerText = nome;
+            }
+
+            carregarTabela();
+        }
+
+        window.onload = inicializarSistema;
+
+        function logout() {
+            if (confirm("Deseja sair?")) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+
+</html>

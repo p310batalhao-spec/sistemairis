@@ -1,0 +1,55 @@
+/* Container que segura os botões */
+.paginascertidoes {
+    display: flex;
+    flex: 1;
+    justify-content: space-between; /* Espaça os itens igualmente */
+    align-items: stretch;           /* Garante que todos tenham a mesma altura */
+    width: 75%;
+    gap: 15px;                      /* Espaço entre os botões */
+    background: #ffffff;            /* Fundo branco limpo */
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra suave */
+}
+
+/* Oculta o H3 para o alinhamento ficar perfeito, ou coloque-o fora da div no HTML */
+.paginascertidoes h3 {
+    display: none; 
+}
+
+/* Estilização dos Links (Transformados em Cards) */
+.paginascertidoes a {
+    flex: 1;                        /* ESTA LINHA FAZ ELES PREENCHEREM A PÁGINA IGUALMENTE */
+    display: flex;
+    flex-direction: column;         /* Ícone em cima, texto embaixo */
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #4b0082;                 /* Indigo */
+    font-weight: bold;
+    font-size: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f8f9fa;      /* Cinza clarinho moderno */
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;      /* Transição suave para o hover */
+}
+
+/* Efeito Hover Moderno */
+.paginascertidoes a:hover {
+    background-color: #7f00ff;      /* Roxo vibrante */
+    color: #ffffff;                 /* Texto branco no hover */
+    transform: translateY(-5px);    /* Efeito de flutuar */
+    box-shadow: 0 6px 15px rgba(127, 0, 255, 0.3);
+    border-color: #7f00ff;
+}
+.paginascertidoes img:hover{
+    filter: brightness(1.2); /* Aumenta o brilho da imagem no hover */
+}
+
+/* Estilo para ícones (se você estiver usando FontAwesome dentro do <a>) */
+.paginascertidoes a i {
+    font-size: 22px;
+    margin-bottom: 10px;
+}

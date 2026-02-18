@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dossiê Unificado - ÍRIS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            padding: 20px;
+            line-height: 1.3;
+            color: #333;
+        }
+
+        .header-dossie {
+            text-align: center;
+            border-bottom: 2px solid #27ae60;
+            margin-bottom: 15px;
+        }
+
+        .secao-titulo {
+            background: #2c3e50;
+            color: white;
+            padding: 6px;
+            margin-top: 15px;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 10px;
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+            font-size: 10px;
+        }
+
+        .termo-box {
+            border: 1px solid #aaa;
+            padding: 10px;
+            margin-top: 5px;
+            background: #fff;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        .footer-relatorio {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            font-size: 10px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="no-print"><button onclick="window.print()" style="padding: 10px; cursor: pointer;">Imprimir
+            Dossiê</button></div>
+
+    <div class="header-dossie">
+        <h1>RELATÓRIO DE ACOMPANHAMENTO DA ASSISTIDA - PMP/PMAL</h1>
+        <p>POLÍCIA MILITAR DE ALAGOAS</p>
+        <p>CENTRAL DE MONITORAMENTO ÍRIS-PMAL</p>
+    </div>
+
+
+    <div id="conteudo-dossie">
+        <div class="secao-titulo">Dados Cadastrais</div>
+        <div id="perfil-assistida" class="info-grid"></div>
+
+        <div class="secao-titulo">Termo de Consentimento</div>
+        <div id="secao-consentimento"></div>
+
+        <div class="secao-titulo">Histórico de Fiscalizações (Certidões)</div>
+        <table id="tab-certidoes">
+            <thead>
+                <tr>
+                    <th>DATA</th>
+                    <th>BOU/COP</th>
+                    <th>FORMA DE CONTATO</th>
+                    <th>ALTERAÇÕES RELATADAS</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="secao-titulo">Logs de Emergência (Acionamentos)</div>
+        <table id="tab-emergencia">
+            <thead>
+                <tr>
+                    <th>ACIONAMENTO</th>
+                    <th>COORDENADAS GPS</th>
+                    <th>RESPOSTA</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="secao-titulo">Encerramento do Acompanhamento</div>
+        <div id="secao-encerramento"></div>
+    </div>
+    <footer class="footer-relatorio">
+        <p>
+            Seção de Planejamento, Instrução e Estatística - P3
+        </p>
+        <p>
+            Relatório gerado pelo Sistema ÍRIS - Polícia Militar de Alagoas em: <span id="data-geracao"></span>
+        </p>
+    </footer>
+    <script>
+        window.onload = function () {
+            const dossie = JSON.parse(localStorage.getItem('dadosDossie'));
+            if (!dossie) return;
+
+            // 1. Perfil da Assistida
+            const p = dossie.perfil;
+            document.getElementById('perfil-assistida').innerHTML = `
+            <div><b>NOME:</b> ${p.NOME}</div>
+            <div><b>CPF:</b> ${p.CPF || '-'}</div>
+            <div><b>MPU:</b> ${p.MPU || '-'}</div>
+            <div><b>VARA:</b> ${p.VARA || '-'}</div>
+            <div><b>FONE:</b> ${p.TELEFONE || '-'}</div>
+            <div><b>STATUS:</b> ${p.STATUS || 'ATIVO'}</div>
+        `;
+
+            // 2. Termo de Consentimento
+            const divCons = document.getElementById('secao-consentimento');
+            if (dossie.registros.TermoConsentimento && dossie.registros.TermoConsentimento.length > 0) {
+                divCons.innerHTML = ""; // Limpa o "Carregando"
+                dossie.registros.TermoConsentimento.forEach(t => {
+                    divCons.innerHTML += `<div class="termo-box">
+                    <b>Data do Aceite:</b> ${t.DATA || '-'} | <b>Operador:</b> ${t.OPERADOR || '-'} <br>
+                    <b>Documento:</b> Termo assinado digitalmente e arquivado no banco de dados.
+                </div>`;
+                });
+            } else {
+                divCons.innerHTML = "<p>Nenhum termo de consentimento registrado.</p>";
+            }
+
+            // 3. Certidões (Fiscalizações)
+            const tbCert = document.querySelector('#tab-certidoes tbody');
+            if (dossie.registros.certidoes && dossie.registros.certidoes.length > 0) {
+                tbCert.innerHTML = ""; // Limpa a tabela antes de preencher
+                dossie.registros.certidoes.forEach(c => {
+                    // Tentamos buscar pelos nomes prováveis que vêm do Sheets/Firebase
+                    // Usamos [''] para campos com espaços
+                    const formaContato = c["FORMA DE CONTATO"] || c.FORMA_CONTATO || c.CONTATO || c["CONTATO"] || "-";
+
+                    tbCert.innerHTML += `<tr>
+            <td>${c.DATA || '-'}</td>
+            <td>${c.NUMERO_BOU || c.BOU || '-'}</td>
+            <td>${formaContato}</td>
+            <td>${c.ALTERACOES || 'Sem Alterações'}</td>
+        </tr>`;
+                });
+            } else {
+                tbCert.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Nenhuma certidão encontrada.</td></tr>";
+            }
+
+            // 4. Emergência (Dados vindos do LOGS_EMERGENCIA via campo ASSISTIDA_LINK)
+            const tbEmer = document.querySelector('#tab-emergencia tbody');
+            if (dossie.registros.emergencia && dossie.registros.emergencia.length > 0) {
+                tbEmer.innerHTML = ""; // Limpa a tabela
+                dossie.registros.emergencia.forEach(e => {
+                    const gps = e.COORDENADA_GPS || "-";
+                    // Link formatado corretamente para o Google Maps
+                    const linkMaps = gps !== "-" ?
+                        `<a href="https://www.google.com/maps?q=${gps}" target="_blank" style="color: blue; text-decoration: underline;">${gps}</a>` : "-";
+
+                    tbEmer.innerHTML += `<tr>
+                    <td>${e.DATA_HORA_ACIO || '-'}</td>
+                    <td>${linkMaps}</td>
+                    <td>${e.DATA_HORA_RESPOSTA || '-'}</td>
+                </tr>`;
+                });
+            } else {
+                tbEmer.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Nenhum acionamento de emergência registrado.</td></tr>";
+            }
+
+            // 5. Encerramento
+            const divEnc = document.getElementById('secao-encerramento');
+            if (dossie.registros.encerramento && dossie.registros.encerramento.length > 0) {
+                divEnc.innerHTML = "";
+                dossie.registros.encerramento.forEach(enc => {
+                    divEnc.innerHTML += `<div class="termo-box">
+                    <b>Data:</b> ${enc.DATA_ENCERRAMENTO || enc.DATA} | <b>Motivo:</b> ${enc.MOTIVO_ENCERRAMENTO}<br>
+                    <b>Justificativa:</b> ${enc.JUSTIFICATIVA || '-'}
+                </div>`;
+                });
+            } else {
+                divEnc.innerHTML = "<p>Acompanhamento ainda em vigor (Ativo).</p>";
+            }
+
+            // Adiciona data de geração no footer se existir o campo
+            const elDataGeracao = document.getElementById('data-geracao');
+            if (elDataGeracao) {
+                const agora = new Date();
+                elDataGeracao.innerText = agora.toLocaleDateString('pt-BR') + " às " + agora.toLocaleTimeString('pt-BR');
+            }
+        };
+        const agora = new Date();
+        const dataFormatada = agora.toLocaleDateString('pt-BR') + " às " + agora.toLocaleTimeString('pt-BR');
+        document.getElementById('data-geracao').innerText = dataFormatada;
+    </script>
+</body>
+
+</html>
