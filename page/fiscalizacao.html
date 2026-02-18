@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema PMP/PMAL | FISCALIZAÇÃO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/stylesindex.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/certidao.css">
-    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/stylesindex.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/certidao.css">
+    <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon">
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -20,7 +20,7 @@
         <section class="cabecalho-geral"
             style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <div class="header-info-left">
-                <img class="brasao" src="img/brasao.png" alt="brasao">
+                <img class="brasao" src="../img/brasao.png" alt="brasao">
                 <div class="cabecalho">
                     <h1>CENTRAL DE MONITORAMENTO ÍRIS</h1>
                     <h3>POLÍCIA MILITAR DE ALAGOAS</h3>
@@ -39,7 +39,7 @@
     <section class="pagecomplete">
         <nav class="navegacao">
             <div class="nav-links">
-                <a href="index.html">
+                <a href="../index.html">
                     <img width="30" height="30" src="https://img.icons8.com/material-outlined/24/home--v2.png"
                         alt="home" />
                     <p>Home</p>
@@ -453,7 +453,7 @@
                     };
 
                     localStorage.setItem('dadosRelatorioMensal', JSON.stringify(infoRelatorio));
-                    window.open('relatorios/relatorio_mensal.html', '_blank');
+                    window.open('../relatorios/relatorio_mensal.html', '_blank');
                 });
             });
         }

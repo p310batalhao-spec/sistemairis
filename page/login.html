@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso | Central Íris PMAL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="../css/login.css">
 </head>
 
 <body class="login-page-body">
 
     <div class="login-container">
         <div class="login-header">
-            <img src="img/brasao.png" alt="Brasão PMAL" onerror="this.src='https://via.placeholder.com/90?text=PMAL'">
+            <img src="../img/brasao.png" alt="Brasão PMAL" onerror="this.src='https://via.placeholder.com/90?text=PMAL'">
             <h2 id="form-title">CENTRAL ÍRIS</h2>
             <h3>Monitoramento de Botão do Pânico - 10º BPM</h3>
         </div>
@@ -178,7 +178,7 @@
                     // ele salvará uma string vazia em vez de "undefined"
                     localStorage.setItem('usuarioGraduacao', result.graduacao || "");
 
-                    window.location.href = 'index.html';
+                    window.location.href = '../index.html';
                 } else {
                     exibirAviso(result.message, "erro");
                     btn.disabled = false;
