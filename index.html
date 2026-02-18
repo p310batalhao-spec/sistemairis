@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema PMP/PMAL | Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/stylesindex.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+</head> 
+
+<body>
+    <audio id="sireneAudio">
+        <source src="https://github.com/p310batalhao-spec/AppScript-Audios/raw/refs/heads/main/ambulance-siren.mp3"
+            type="audio/mpeg">
+    </audio>
+
+    <header>
+        <section class="cabecalho-geral"
+            style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="header-info-left">
+                <img class="brasao" src="/img/brasao.png" alt="brasao">
+                <div class="cabecalho">
+                    <h1>CENTRAL DE MONITORAMENTO ÍRIS</h1>
+                    <h3>POLÍCIA MILITAR DE ALAGOAS</h3>
+                    <h3>CENTRAL DE OPERAÇÕES DA POLÍCIA MILITAR - COPOM</h3>
+                    <h3 id="unidade">--</h3>
+                </div>
+            </div>
+
+            <div class="header-info-right" style="text-align: right; padding-right: 50px;">
+                <div style="color: blueviolet; font-weight: bold; font-size: 1rem;">
+                    <i class="fas fa-user-shield"></i> Operador: <span id="graduacao-operador"></span> <span
+                        id="nome-operador">---</span>
+                </div>
+                <div id="relogio"
+                    style="color: #555; font-weight: bold; font-size: 1.1rem; margin-top: 5px; margin-right: 30px ;">
+                    <span id="current-date-time"></span>
+                </div>
+            </div>
+        </section>
+    </header>
+    </header>
+
+    <main>
+        <section class="pagecomplete">
+            <nav class="navegacao">
+                <div class="nav-links">
+                    <a href="index.html" class="active">
+                        <img width="30" height="30" src="https://img.icons8.com/material-outlined/24/home--v2.png"
+                            alt="home" />
+                        <p>Home</p>
+                    </a>
+                    <a href="fiscalizacaohome.html">
+                        <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/policeman-female.png"
+                            alt="policeman-female" />
+                        <p>Fiscalização</p>
+                    </a>
+                </div>
+
+                <a href="javascript:void(0)" onclick="logout()"
+                    style="color: #d9534f; border-top: 1px solid #eee; padding-top: 15px;">
+                    <i class="fas fa-sign-out-alt" style="font-size: 24px;"></i>
+                    <p>Sair</p>
+                </a>
+            </nav>
+            <section class="conteudo-principal" style="flex: 1; overflow-y: auto; padding: 20px;">
+                <div id="status"></div>
+
+                <section class="controle_cards"
+                    style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px;">
+                    <div class="cards">
+                        <div class="cards_nome">
+                            <p>ALERTAS ATIVOS</p>
+                            <p class="numero" id="kpi-ativos">--</p>
+                        </div>
+                        <i class="fas fa-bell" style="font-size: 30px; color: #d9534f;"></i>
+                    </div>
+                    <div class="cards">
+                        <div class="cards_nome">
+                            <p>ATENDIDOS HOJE</p>
+                            <p class="numero" id="kpi-atendidos">--</p>
+                        </div>
+                        <i class="fas fa-check-circle" style="font-size: 30px; color: #5cb85c;"></i>
+                    </div>
+                    <div class="cards">
+                        <div class="cards_nome">
+                            <p>EM ATENDIMENTO</p>
+                            <p class="numero" id="kpi-em-atendimento">0</p>
+                        </div>
+                        <i class="fas fa-car" style="font-size: 30px; color: #f0ad4e;"></i>
+                    </div>
+                    <div class="cards">
+                        <div class="cards_nome">
+                            <p>TOTAL GERAL</p>
+                            <p class="numero" id="kpi-total">--</p>
+                        </div>
+                        <i class="fas fa-chart-line" style="font-size: 30px; color: #5bc0de;"></i>
+                    </div>
+                </section>
+
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <section
+                        style="flex: 1; min-width: 300px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <h3>ALERTAS RECENTES</h3>
+                        <div id="alert-list">
+                            <p style="text-align: center; color: gray;"><i class="fas fa-sync-alt fa-spin"></i>
+                                Carregando...</p>
+                        </div>
+                    </section>
+
+                    <section
+                        style="flex: 1; min-width: 400px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <h3>MAPA DE OCORRÊNCIAS</h3>
+                        <iframe id="map-iframe" src="" frameborder="0"></iframe>
+                    </section>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-alert-title">ALERTA: BOTÃO DO PÂNICO ATIVADO!</div>
+        <div class="sidebar-header">
+            <h4><i class="fas fa-info-circle"></i> DETALHES</h4>
+            <button onclick="fecharSidebar()" style="background:none; border:none; cursor:pointer; font-size: 20px;"><i
+                    class="fas fa-times"></i></button>
+        </div>
+        <button id="btn-copiar" class="copy-btn" style="display:none;"><i class="fas fa-copy"></i> Copiar
+            Detalhes</button>
+        <div id="detalhes">Selecione um alerta.</div>
+        <button id="sidebar-action-btn" class="status-btn"
+            style="width:100%; margin-top: 20px; display:none; background-color: #d9534f; color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            <i class="fas fa-paper-plane"></i> GUARNIÇÃO ENVIADA
+        </button>
+    </div>
+    <footer>
+        <h4>Seção de Planejamento, Instrução e Estatística - P3/10ºBPM</h4>
+        <h4>Patrulha Maria da Penha - 10ºBPM</h4>
+    </footer>
+
+    <script>
+        // =================================================================
+        // CONFIGURAÇÃO DA API (VS CODE)
+        // =================================================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvl-K5SrsLYdHHBBYQSzWpKwWf7IvqP2LMPyDCpeyi7dGXoVLG8VJ5pvCnbvcQP0Qj/exec";
+
+        // Mapeamento dos Elementos (Todos Restaurados)
+        const alertListDiv = document.getElementById('alert-list');
+        const sidebar = document.getElementById('sidebar');
+        const detalhes = document.getElementById('detalhes');
+        const sidebarActionBtn = document.getElementById('sidebar-action-btn');
+        const btnCopiar = document.getElementById('btn-copiar');
+        const statusDiv = document.getElementById('status');
+        const kpiAtivos = document.getElementById('kpi-ativos');
+        const kpiAtendidos = document.getElementById('kpi-atendidos');
+        const kpiEmAtendimento = document.getElementById('kpi-em-atendimento');
+        const kpiTotal = document.getElementById('kpi-total');
+        const currentDateTimeSpan = document.getElementById('current-date-time');
+
+        // LÓGICA DE SIRENE (RESTAURADA)
+        const audioSirene = document.getElementById('sireneAudio');
+        audioSirene.loop = false;
+        let sireneTocadaParaAlertaAtual = false;
+        let ultimoRowIndexMaisRecente = null;
+
+        audioSirene.addEventListener('ended', function () {
+            audioSirene.pause();
+            audioSirene.currentTime = 0;
+        });
+
+        function tocarSirene() {
+            if (!sireneTocadaParaAlertaAtual) {
+                if (!audioSirene.paused) return;
+                audioSirene.play()
+                    .then(() => { sireneTocadaParaAlertaAtual = true; })
+                    .catch(e => console.warn("Autoplay bloqueado. Aguardando interação."));
+            }
+        }
+
+        function pararSirene() {
+            if (audioSirene.readyState > 0) {
+                audioSirene.pause();
+                audioSirene.currentTime = 0;
+            }
+        }
+
+        let logSelecionado = null;
+
+        // RELÓGIO (RESTAURADO)
+        function updateLiveDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (currentDateTimeSpan) currentDateTimeSpan.innerText = dateStr + ' ' + timeStr;
+        }
+
+        function formatarData(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            return d.toLocaleString('pt-BR');
+        }
+
+        // MAPAS E GPS (RESTAURADOS)
+        function gerarLinkMapa(logs) {
+            const DEFAULT_COORDS = '-9.712613,-35.894225';
+            let markers = [];
+            const logsParaMapa = logs.slice(0, 5);
+            logsParaMapa.forEach(log => {
+                if (log.COORDENADA_GPS) markers.push(log.COORDENADA_GPS.replace(/ /g, ''));
+            });
+            const mapMarkers = markers.length > 0 ? markers.join('+|+') : DEFAULT_COORDS;
+            return 'https://maps.google.com/maps?q=' + mapMarkers + '&z=14&output=embed';
+        }
+
+        function gerarLinkGPS(coords) {
+            if (!coords) return '#';
+            return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(coords);
+        }
+
+        // CARREGAR (HÍBRIDO VS CODE / APP SCRIPT)
+        function carregar() {
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run
+                    .withSuccessHandler(processar)
+                    .withFailureHandler(e => {
+                        statusDiv.innerText = 'Erro: ' + e;
+                        statusDiv.style.display = 'block';
+                    })
+                    .getLogsData();
+            } else {
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getLogs' })
+                })
+                    .then(res => res.json())
+                    .then(processar)
+                    .catch(e => {
+                        console.error('Erro API:', e);
+                        statusDiv.innerText = 'Erro de comunicação local.';
+                        statusDiv.style.display = 'block';
+                    });
+            }
+        }
+
+        function isSameDay(iso1, iso2) {
+            if (!iso1 || !iso2) return false;
+            const d1 = new Date(iso1), d2 = new Date(iso2);
+            return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+        }
+
+        // PROCESSAR (LÓGICA DE KPI SOLICITADA)
+        function processar(resp) {
+            if (!resp || resp.error) {
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erro: ' + (resp.error || 'Falha.');
+                statusDiv.style.display = 'block';
+                return;
+            }
+            statusDiv.style.display = 'none';
+
+            const logs = resp.logs.sort((a, b) => new Date(b.DATA_HORA_ACIO) - new Date(a.DATA_HORA_ACIO));
+
+            // Filtros corrigidos para o seu pedido
+            const logsPendentes = logs.filter(l => !l.RESPOSTA);
+            const todayISO = new Date().toISOString();
+            const logsResolvidosHoje = logs.filter(l => l.RESPOSTA && isSameDay(l.DATA_HORA_RESPOSTA, todayISO));
+
+            // ATUALIZAÇÃO DOS CARDS
+            kpiAtivos.innerText = logsPendentes.length;
+            kpiEmAtendimento.innerText = logsPendentes.length; // Em atendimento = Alertas Pendentes
+            kpiAtendidos.innerText = logsResolvidosHoje.length;
+            kpiTotal.innerText = logs.length;
+
+            // LÓGICA SIRENE
+            if (logsPendentes.length > 0) {
+                const maisRecenteIndex = logsPendentes[0]._rowIndex;
+                if (maisRecenteIndex !== ultimoRowIndexMaisRecente) {
+                    sireneTocadaParaAlertaAtual = false;
+                    tocarSirene();
+                    ultimoRowIndexMaisRecente = maisRecenteIndex;
+                }
+            } else {
+                pararSirene();
+                sireneTocadaParaAlertaAtual = false;
+                ultimoRowIndexMaisRecente = null;
+            }
+
+            // LISTA DE ALERTAS
+            alertListDiv.innerHTML = '';
+            if (logsPendentes.length === 0) {
+                alertListDiv.innerHTML = '<p style="text-align: center; padding: 20px;">Nenhum alerta pendente.</p>';
+            } else {
+                logsPendentes.forEach((log, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'alert-item' + (index === 0 ? ' new' : '');
+                    item.innerHTML = `
+                <div class="alert-info">
+                    <strong><i class="fas fa-exclamation-triangle"></i> ${log.NOME_ASSISTIDA || 'Desconhecido'}</strong>
+                    <p><i class="fas fa-map-marker-alt"></i> ${log.ENDEREÇO || 'N/A'}</p>
+                    <p><i class="fas fa-phone"></i> ${log.TELEFONE_ASSISTIDA || 'N/A'}</p>
+                    <p><i class="fas fa-clock"></i> ${formatarData(log.DATA_HORA_ACIO)}</p>
+                </div>
+                <div class="alert-action">
+                    <button class="alert-item-btn" onclick="event.stopPropagation(); enviar(${log._rowIndex}, this)">
+                        <i class="fas fa-paper-plane"></i> ATENDER
+                    </button>
+                </div>`;
+                    item.onclick = () => abrirDetalhes(log);
+                    alertListDiv.appendChild(item);
+                });
+            }
+            document.getElementById('map-iframe').src = gerarLinkMapa(logsPendentes);
+        }
+
+        // ENVIAR (HÍBRIDO)
+        function enviar(idx, elementToUpdate) {
+            pararSirene();
+            elementToUpdate.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            elementToUpdate.disabled = true;
+
+            const payload = {
+                action: 'atender',
+                rowIndex: idx,
+                responseText: 'Guarnição Enviada',
+                timestampISO: new Date().toISOString()
+            };
+
+            if (typeof google !== 'undefined' && google.script) {
+                google.script.run
+                    .withSuccessHandler(carregar)
+                    .modifyResponse(idx, payload.responseText, payload.timestampISO);
+            } else {
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                })
+                    .then(() => carregar())
+                    .catch(err => alert("Erro ao atender: " + err));
+            }
+        }
+
+        // DETALHES E GEOCODIFICAÇÃO (RESTAURADOS E HÍBRIDOS)
+        function abrirDetalhes(log) {
+            logSelecionado = log;
+            btnCopiar.style.display = 'flex';
+            const coords = log.COORDENADA_GPS || 'N/A';
+            const linkMapaViatura = gerarLinkGPS(coords); // Gera o link direto
+
+            detalhes.innerHTML = `
+            <div><strong>Nome:</strong> <span>${log.NOME_ASSISTIDA || 'N/A'}</span></div>
+            <div><strong>Telefone:</strong> <span>${log.TELEFONE_ASSISTIDA || 'N/A'}</span></div>
+            <div><strong>Data/Hora:</strong> <span>${formatarData(log.DATA_HORA_ACIO)}</span></div>
+            <div><strong>Endereço Cadastrado:</strong> <span>${log.ENDEREÇO || 'N/A'}</span></div>
+            <div><strong>Coordenadas:</strong> <span>${coords}</span></div>
+            
+            <div id="geocoded-address-container" style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #007bff;">
+                <strong>Localização Real (Aproximada):</strong> <br>
+                <span id="geocoded-address"><i class="fas fa-spinner fa-spin"></i> Identificando rua...</span>
+            </div>
+
+            <div style="margin-top: 15px; text-align: center;">
+                <a href="${linkMapaViatura}" target="_blank" class="btn-gps" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; width: 100%;">
+                    <i class="fas fa-route"></i> ABRIR ROTA NO GOOGLE MAPS
+                </a>
+            </div>`;
+
+            // Lógica de Geocodificação (Mantida)
+            if (coords !== 'N/A') {
+                if (typeof google !== 'undefined' && google.script) {
+                    google.script.run
+                        .withSuccessHandler(end => document.getElementById('geocoded-address').innerText = end)
+                        .reverseGeocode(coords);
+                } else {
+                    fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'geocode', coords: coords })
+                    })
+                        .then(res => res.json())
+                        .then(data => document.getElementById('geocoded-address').innerText = data.address)
+                        .catch(() => document.getElementById('geocoded-address').innerText = "Erro ao buscar local.");
+                }
+            }
+            sidebar.classList.add('open');
+        }
+
+        function fecharSidebar() { sidebar.classList.remove('open'); }
+
+        // COPIAR DETALHES (RESTAURADO)
+        function copiarDetalhes() {
+            if (!logSelecionado) return;
+            const coords = logSelecionado.COORDENADA_GPS || 'N/A';
+            const enderecoPreciso = document.getElementById('geocoded-address').innerText;
+
+            const textoPuro = '*ALERTA: BOTÃO DO PÂNICO ATIVADO!*' +
+                '\n\n*DETALHES DA OCORRÊNCIA:*' +
+                '\nNome: ' + (logSelecionado.NOME_ASSISTIDA || 'N/A') +
+                '\nTelefone: ' + (logSelecionado.TELEFONE_ASSISTIDA || 'N/A') +
+                '\nData/Hora: ' + formatarData(logSelecionado.DATA_HORA_ACIO) +
+                '\nEndereço: ' + (logSelecionado.ENDEREÇO || 'N/A') +
+                '\nGPS: ' + coords +
+                '\nLocalização Real: ' + enderecoPreciso +
+                '\nLINK GPS: ' + gerarLinkGPS(coords);
+
+            navigator.clipboard.writeText(textoPuro.trim()).then(() => {
+                btnCopiar.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                setTimeout(() => { btnCopiar.innerHTML = '<i class="fas fa-copy"></i> Copiar Detalhes'; }, 1500);
+            });
+        }
+
+        // 1. Função para exibir quem está logado (Recupera do localStorage)
+        // index.html - Substitua a função antiga por esta
+        // --- LÓGICA DE INTERFACE, ACESSO E RELÓGIO ---
+
+        function inicializarSistema() {
+            // 1. Captura os elementos do DOM
+            const spanNome = document.getElementById('nome-operador');
+            const spanGraduacao = document.getElementById('graduacao-operador');
+            const h3Unidade = document.getElementById('unidade');
+            const dateTimeSpan = document.getElementById('current-date-time');
+
+            // 2. Recupera os dados do LocalStorage
+            const nomeSalvo = localStorage.getItem('usuarioNome');
+            const unidadeSalva = localStorage.getItem('usuarioUnidade');
+            const graduacaoSalva = localStorage.getItem('usuarioGraduacao');
+
+            // 3. Função auxiliar para limpar valores "indefinidos" vindos do LocalStorage
+            const limparValor = (valor) => {
+                if (!valor || valor === "undefined" || valor === "null") return "";
+                return valor;
+            };
+
+            // 4. Validação de Sessão
+            const nomeLimpo = limparValor(nomeSalvo);
+
+            if (nomeLimpo !== "") {
+                if (spanNome) {
+                    const gradLimpa = limparValor(graduacaoSalva);
+                    // Junta Graduação + Nome. O .trim() remove espaços extras se a graduação for vazia.
+                    spanNome.innerText = `${gradLimpa} ${nomeLimpo}`.trim();
+                }
+
+                if (h3Unidade) {
+                    const unidadeLimpa = limparValor(unidadeSalva);
+                    h3Unidade.innerText = unidadeLimpa || "UNIDADE NÃO DEFINIDA";
+                }
+            } else {
+                console.warn("Sessão expirada ou inválida. Redirecionando...");
+                window.location.replace('login.html');
+                return;
+            }
+
+            // 5. Função do Relógio
+            function atualizarRelogio() {
+                const agora = new Date();
+                const data = agora.toLocaleDateString('pt-BR');
+                const hora = agora.toLocaleTimeString('pt-BR');
+                if (dateTimeSpan) {
+                    dateTimeSpan.innerText = `${data} | ${hora}`;
+                }
+            }
+
+            atualizarRelogio();
+            setInterval(atualizarRelogio, 1000);
+
+            // Chamada de funções dependentes (se existirem na página)
+            if (typeof popularSelectAssistidas === "function") popularSelectAssistidas();
+            if (typeof carregarTabela === "function") carregarTabela();
+        }
+
+        // Função de Logout
+        function logout() {
+            if (confirm("Deseja realmente encerrar a sessão?")) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Inicialização Geral
+        window.onload = () => {
+            inicializarSistema();
+
+            // Inicia a função de carregar logs da planilha (se existir)
+            if (typeof carregar === "function") {
+                carregar();
+                setInterval(carregar, 30000); // Atualiza dados a cada 30 segundos
+            }
+        };
+    </script>
+</body>
+
+</html>

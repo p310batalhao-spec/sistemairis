@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema PMP/PMAL | FISCALIZAÇÃO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/stylesindex.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/certidao.css">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+</head>
+
+<body>
+    <header>
+        <section class="cabecalho-geral"
+            style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="header-info-left">
+                <img class="brasao" src="/img/brasao.png" alt="brasao">
+                <div class="cabecalho">
+                    <h1>CENTRAL DE MONITORAMENTO ÍRIS</h1>
+                    <h3>POLÍCIA MILITAR DE ALAGOAS</h3>
+                    <h3>CENTRAL DE OPERAÇÕES DA POLÍCIA MILITAR - COPOM</h3>
+                    <h3 id="unidade">--</h3>
+                </div>
+            </div>
+            <div class="header-info-right" style="text-align: right; padding-right: 50px;">
+                <div style="color: blueviolet; font-weight: bold;"><i class="fas fa-user-shield"></i> Operador: <span
+                        id="nome-operador">---</span></div>
+                <div id="relogio" style="color: #555; font-weight: bold; font-size: 1.1rem;"><span
+                        id="current-date-time"></span></div>
+            </div>
+        </section>
+    </header>
+    <section class="pagecomplete">
+        <nav class="navegacao">
+            <div class="nav-links">
+                <a href="index.html">
+                    <img width="30" height="30" src="https://img.icons8.com/material-outlined/24/home--v2.png"
+                        alt="home" />
+                    <p>Home</p>
+                </a>
+                <a href="fiscalizacaohome.html" class="active">
+                    <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/policeman-female.png"
+                        alt="policeman-female" />
+                    <p>Fiscalização</p>
+                </a>
+            </div>
+
+            <a href="javascript:void(0)" onclick="logout()"
+                style="color: #d9534f; border-top: 1px solid #eee; padding-top: 15px;">
+                <i class="fas fa-sign-out-alt" style="font-size: 24px;"></i>
+                <p>Sair</p>
+            </a>
+        </nav>
+
+        <div class="container-tabela">
+            <div class="header-tabela">
+                <h2 style="color: blueviolet;"><i style="color: blueviolet;" class="fas fa-file-invoice"></i> Certidões
+                    de Fiscalização</h2>
+                <button class="btn-adicionar" onclick="abrirSidebarCertidao()">
+                    <i class="fas fa-plus"></i> Nova Certidão
+                </button>
+            </div>
+            <div class="barra-filtros">
+                <div style="flex: 1; min-width: 200px;">
+                    <input class="filtro" type="text" id="filtro-nome" placeholder="Filtrar por Assistida..." onkeyup="filtrarTabela()">
+                </div>
+                <input class="filtrodata" type="date" id="filtro-data" onchange="filtrarTabela()">
+                <button class="btn-adicionar" onclick="abrirModalRelatorio()"
+                    style="background-color: #2c3e50; margin-left: auto;">
+                    <i class="fas fa-print"></i> Relatório Mensal
+                </button>
+            </div>
+
+            <div id="modal-relatorio" class="sidebar-cadastro"
+                style="display:none; background: rgba(0,0,0,0.5); width: 100%; height: 100%; justify-content: center; align-items: center;">
+                <div style="background: white; padding: 30px; border-radius: 8px; width: 400px; position: relative;">
+                    <h3>Gerar Relatório Mensal</h3>
+                    <br>
+                    <label>Data Início:</label>
+                    <input type="date" id="rel-inicio" class="grupo-input" style="width: 100%; margin-bottom: 10px;">
+                    <label>Data Fim:</label>
+                    <input type="date" id="rel-fim" class="grupo-input" style="width: 100%; margin-bottom: 10px;">
+                    <label>Vara:</label>
+                    <input type="text" id="rel-vara" placeholder="Ex: 1ª VARA"
+                        style="width: 100%; margin-bottom: 20px; padding: 8px;">
+
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="gerarRelatorioMensal()" class="btn-salvar">Gerar Relatório</button>
+                        <button onclick="fecharModalRelatorio()"
+                            style="background:#666; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer;">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tabela-wrapper">
+                <table class="tabela-assistidas">
+                    <thead>
+                        <tr>
+                            <th>DATA</th>
+                            <th>REPRESENTANTE</th>
+                            <th>Nº BOU</th>
+                            <th>GRAU DE RISCO</th>
+                            <th style="text-align: center;">AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela-certidoes">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="sidebar-cadastro" class="sidebar-cadastro">
+            <div class="sidebar-content">
+                <div class="sidebar-header">
+                    <h2 id="titulo-sidebar">Nova Certidão</h2>
+                    <button onclick="fecharSidebar()" class="btn-fechar-sidebar">&times;</button>
+                </div>
+
+                <form id="form-certidao">
+                    <input type="hidden" id="ID">
+                    <div class="grupo-input">
+                        <label>Nome do Representado</label>
+                        <input type="text" id="NOME_DO_REPRESENTADO" required>
+                    </div>
+
+                    <div class="grupo-input">
+                        <label>Representante (Assistida)</label>
+                        <select id="NOME_DA_REPRESENTANTE" required>
+                            <option value="">Selecione a Assistida...</option>
+                        </select>
+                    </div>
+
+                    <div class="row-form" style="display:flex; gap:10px;">
+                        <div class="grupo-input" style="flex:1;">
+                            <label>Vara</label>
+                            <input type="text" id="VARA">
+                        </div>
+                        <div class="grupo-input" style="flex:1;">
+                            <label>MPU</label>
+                            <input type="text" id="MPU">
+                        </div>
+                    </div>
+
+                    <div class="row-form" style="display:flex; gap:10px;">
+                        <div class="grupo-input" style="flex:1;">
+                            <label>Data</label>
+                            <input type="date" id="DATA" required>
+                        </div>
+                        <div class="grupo-input" style="flex:1;">
+                            <label>Nº BOU</label>
+                            <input type="text" id="NUMERO_BOU">
+                        </div>
+                    </div>
+
+                    <div class="grupo-input">
+                        <label>Comandante da Guarnição</label>
+                        <input type="text" id="CMT_GUARNICAO">
+                    </div>
+
+                    <div class="row-form" style="display:flex; gap:10px;">
+                        <div class="grupo-input" style="flex:1;">
+                            <label>Forma de Contato</label>
+                            <select id="FORMA_DE_CONTATO">
+                                <option value="PRESENCIAL">Presencial</option>
+                                <option value="TELEFÔNICO">Telefônico</option>
+                                <option value="OUTROS">Outros</option>
+                            </select>
+                        </div>
+                        <div class="grupo-input" style="flex:1;">
+                            <label>Grau de Risco</label>
+                            <select id="GRAU_DE_RISCO">
+                                <option value="BAIXO">Baixo</option>
+                                <option value="MÉDIO">Médio</option>
+                                <option value="ALTO">Alto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grupo-input">
+                        <label>Relato</label>
+                        <textarea id="RELATO" rows="3"></textarea>
+                    </div>
+
+                    <div class="grupo-input">
+                        <label>Observação</label>
+                        <textarea id="OBSERVACAO" rows="2"></textarea>
+                    </div>
+
+                    <div class="grupo-input">
+                        <label>Alteração</label>
+                        <input type="text" id="ALTERACAO">
+                    </div>
+
+                    <div class="grupo-input">
+                        <label>Multidisciplinar</label>
+                        <input type="text" id="MULTIDISCIPLINAR">
+                    </div>
+
+                    <div class="row-form" style="display:flex; gap:10px;">
+                        <div class="grupo-input">
+                            <label>Ass. Representante</label>
+                            <select id="ASS_REPRESENTANTE">
+                                <option value="SIM">SIM</option>
+                                <option value="NÃO">NÃO</option>
+                            </select>
+                        </div>
+                        <div class="grupo-input">
+                            <label>Ass. CMT</label>
+                            <select id="ASS_CMT">
+                                <option value="SIM">SIM</option>
+                                <option value="NÃO">NÃO</option>
+                            </select>
+                        </div>
+                        <div class="grupo-input">
+                            <label>Ass. Testemunha</label>
+                            <select id="ASS_PM_TESTEMUNHA">
+                                <option value="SIM">SIM</option>
+                                <option value="NÃO">NÃO</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-salvar">Salvar Certidão</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <h4>Seção de Planejamento, Instrução e Estatística - P3/10ºBPM</h4>
+        <h4>Patrulha Maria da Penha - 10ºBPM</h4>
+    </footer>
+
+    <script>
+        // CONFIGURAÇÃO FIREBASE
+        const firebaseConfig = {
+            databaseURL: "https://botpanico-6346c-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- FUNÇÕES DE INTERFACE ---
+        function abrirSidebarCertidao() {
+            document.getElementById('form-certidao').reset();
+            document.getElementById('ID').value = "CERT" + Date.now();
+            document.getElementById('titulo-sidebar').innerText = "Nova Certidão";
+            document.getElementById('sidebar-cadastro').style.width = "450px";
+        }
+
+        function fecharSidebar() {
+            document.getElementById('sidebar-cadastro').style.width = "0";
+        }
+
+        // --- CRUD FIREBASE ---
+
+        // SALVAR / ATUALIZAR
+        document.getElementById('form-certidao').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('ID').value;
+
+            const dados = {
+                "ID": id,
+                "NOME DO REPRESENTADO": document.getElementById('NOME_DO_REPRESENTADO').value,
+                "NOME DA REPESENTANTE": document.getElementById('NOME_DA_REPRESENTANTE').value,
+                "VARA": document.getElementById('VARA').value,
+                "MPU": document.getElementById('MPU').value,
+                "CMT_GUARNICAO": document.getElementById('CMT_GUARNICAO').value,
+                "DATA": document.getElementById('DATA').value,
+                "NUMERO_BOU": document.getElementById('NUMERO_BOU').value,
+                "FORMA DE CONTATO": document.getElementById('FORMA_DE_CONTATO').value,
+                "OBSERVAÇÃO": document.getElementById('OBSERVACAO').value,
+                "MULTIDISCIPLINAR": document.getElementById('MULTIDISCIPLINAR').value,
+                "ASS_REPRESENTANTE": document.getElementById('ASS_REPRESENTANTE').value,
+                "ASS_CMT": document.getElementById('ASS_CMT').value,
+                "ASS_PM_TESTEMUNHA": document.getElementById('ASS_PM_TESTEMUNHA').value,
+                "GRAU DE RISCO": document.getElementById('GRAU_DE_RISCO').value,
+                "RELATO": document.getElementById('RELATO').value,
+                "ALTERAÇÃO": document.getElementById('ALTERACAO').value
+            };
+
+            db.ref('certidoes/' + id).set(dados)
+                .then(() => {
+                    alert("Certidão salva com sucesso!");
+                    fecharSidebar();
+                })
+                .catch(err => alert("Erro ao salvar: " + err));
+        });
+
+        // CARREGAR TABELA
+        // CARREGAR TABELA COM TRADUÇÃO DE ID PARA NOME
+        function carregarTabela() {
+            const tbody = document.getElementById('corpo-tabela-certidoes');
+
+            // Função interna para garantir a conversão
+            const formatarDataBR = (dataString) => {
+                if (!dataString || dataString === "-") return "-";
+                // Se a data vier no formato AAAA-MM-DD (com hífen)
+                if (dataString.includes("-")) {
+                    const partes = dataString.split("-");
+                    // Verifica se o primeiro bloco é o ano (4 dígitos)
+                    if (partes[0].length === 4) {
+                        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                    }
+                }
+                return dataString;
+            };
+
+            db.ref('assistidas').once('value', (snapAssistidas) => {
+                const assistidasMap = {};
+                snapAssistidas.forEach(child => {
+                    assistidasMap[child.key] = child.val().NOME || "Não encontrado";
+                });
+
+                db.ref('certidoes').on('value', (snapshot) => {
+                    tbody.innerHTML = "";
+                    snapshot.forEach((child) => {
+                        const c = child.val();
+
+                        // APLICAÇÃO DA FORMATAÇÃO
+                        const dataExibicao = formatarDataBR(c.DATA);
+
+                        const idRepresentante = c["NOME DA REPESENTANTE"];
+                        const nomeRealRepresentante = assistidasMap[idRepresentante] || idRepresentante;
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                    <td style="font-weight: bold;">${dataExibicao}</td>
+                    <td><b>${nomeRealRepresentante}</b></td>
+                    <td>${c.NUMERO_BOU || '-'}</td>
+                    <td><span class="status-badge" style="background:${c["GRAU DE RISCO"] === 'ALTO' ? '#ffebee' : '#e8f5e9'}">${c["GRAU DE RISCO"] || 'BAIXO'}</span></td>
+                    <td style="text-align:center;">
+                        <button class="btn-edit-tabela" onclick="preencherParaEditar('${child.key}')"><i class="fas fa-edit"></i></button>
+                    </td>
+                `;
+                        tbody.appendChild(tr);
+                    });
+                });
+            });
+        }
+
+        // EDITAR
+        async function preencherParaEditar(id) {
+            const snap = await db.ref(`certidoes/${id}`).once('value');
+            const c = snap.val();
+
+            document.getElementById('ID').value = c.ID;
+            document.getElementById('NOME_DO_REPRESENTADO').value = c["NOME DO REPRESENTADO"] || "";
+            document.getElementById('NOME_DA_REPRESENTANTE').value = c["NOME DA REPESENTANTE"] || "";
+            document.getElementById('VARA').value = c.VARA || "";
+            document.getElementById('DATA').value = c.DATA || "";
+            document.getElementById('NUMERO_BOU').value = c.NUMERO_BOU || "";
+            document.getElementById('GRAU_DE_RISCO').value = c["GRAU DE RISCO"] || "BAIXO";
+            document.getElementById('RELATO').value = c.RELATO || "";
+
+            document.getElementById('titulo-sidebar').innerText = "Editar Certidão";
+            document.getElementById('sidebar-cadastro').style.width = "450px";
+        }
+
+        function popularSelectAssistidas() {
+            const select = document.getElementById('NOME_DA_REPRESENTANTE');
+            db.ref('assistidas').once('value', (snapshot) => {
+                snapshot.forEach((child) => {
+                    const a = child.val();
+                    const option = document.createElement('option');
+                    option.value = child.key; // O valor enviado ao Firebase será o ID
+                    option.text = a.NOME;     // O que o usuário vê será o Nome
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function abrirModalRelatorio() {
+            document.getElementById('modal-relatorio').style.display = 'flex';
+        }
+
+        function fecharModalRelatorio() {
+            document.getElementById('modal-relatorio').style.display = 'none';
+        }
+        function gerarRelatorioMensal() {
+            // Tentamos buscar os elementos
+            const elInicio = document.getElementById('rel-inicio');
+            const elFim = document.getElementById('rel-fim');
+            const elVara = document.getElementById('rel-vara');
+
+            // Se algum deles não existir, o erro acontece aqui. 
+            // Vamos validar antes de pegar o .value
+            if (!elInicio || !elFim) {
+                console.error("Erro: Elementos 'rel-inicio' ou 'rel-fim' não encontrados no HTML.");
+                alert("Erro técnico: Campos de data não encontrados.");
+                return;
+            }
+
+            const inicio = elInicio.value;
+            const fim = elFim.value;
+            const varaFiltro = elVara ? elVara.value : ""; // Se não houver select de vara, assume vazio
+
+            if (!inicio || !fim) {
+                alert("Por favor, selecione o período inicial e final.");
+                return;
+            }
+
+            // --- RESTO DO CÓDIGO (Igual ao anterior) ---
+            const prepararDataParaComparar = (dataBr) => {
+                if (!dataBr || !dataBr.includes('/')) return "";
+                const partes = dataBr.split('/');
+                return `${partes[2]}-${partes[1]}-${partes[0]}`;
+            };
+
+            db.ref('assistidas').once('value', (snapAssistidas) => {
+                const assistMap = {};
+                snapAssistidas.forEach(child => {
+                    assistMap[child.key] = child.val();
+                });
+
+                db.ref('certidoes').once('value', (snapshot) => {
+                    const dadosFiltrados = [];
+                    snapshot.forEach((child) => {
+                        const c = child.val();
+                        const dataComparavel = prepararDataParaComparar(c.DATA);
+
+                        if (dataComparavel >= inicio && dataComparavel <= fim) {
+                            const assistidaObj = assistMap[c["NOME DA REPESENTANTE"]] || {};
+                            const varaC = c.VARA || "";
+
+                            if (varaFiltro === "" || varaC.includes(varaFiltro)) {
+                                dadosFiltrados.push({
+                                    data: c.DATA,
+                                    assistida: assistidaObj.NOME || c["NOME DA REPESENTANTE"],
+                                    vara_mpu: `${c.VARA || '-'} / ${c.MPU || '-'}`,
+                                    bou: c.NUMERO_BOU || '-',
+                                    contato: c["FORMA DE CONTATO"] || '-',
+                                    alteracao: c["ALTERAÇÃO"] || ""
+                                });
+                            }
+                        }
+                    });
+
+                    if (dadosFiltrados.length === 0) {
+                        alert("Nenhum registro encontrado para este período.");
+                        return;
+                    }
+
+                    const infoRelatorio = {
+                        periodo: `${inicio.split('-').reverse().join('/')} a ${fim.split('-').reverse().join('/')}`,
+                        vara: varaFiltro || "TODAS",
+                        dados: dadosFiltrados,
+                        unidade: localStorage.getItem('usuarioUnidade'),
+                        operador: localStorage.getItem('usuarioNome')
+                    };
+
+                    localStorage.setItem('dadosRelatorioMensal', JSON.stringify(infoRelatorio));
+                    window.open('relatorios/relatorio_mensal.html', '_blank');
+                });
+            });
+        }
+        // --- SISTEMA (LOGIN/RELÓGIO) ---
+        function inicializarSistema() {
+            // Unidade e Usuário do LocalStorage
+            document.getElementById('unidade').innerText = localStorage.getItem('usuarioUnidade') || "PMAL";
+            document.getElementById('nome-operador').innerText = localStorage.getItem('usuarioNome') || "Operador";
+
+            // Relógio
+            setInterval(() => {
+                const agora = new Date();
+                document.getElementById('current-date-time').innerText = agora.toLocaleDateString('pt-BR') + " | " + agora.toLocaleTimeString('pt-BR');
+            }, 1000);
+            popularSelectAssistidas();
+            carregarTabela();
+        }
+
+        function logout() {
+            if (confirm("Deseja sair?")) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+
+        window.onload = inicializarSistema;
+    </script>
+</body>
+
+</html>
