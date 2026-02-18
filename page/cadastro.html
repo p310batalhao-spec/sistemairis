@@ -374,7 +374,7 @@
             };
 
             localStorage.setItem('dadosRelatorio', JSON.stringify(relatorioInfo));
-            window.open('/relatorios/assistidas_geral.html', '_blank'); // Removida a pasta /relatorios/ se o arquivo estiver na raiz
+            window.open('../relatorios/assistidas_geral.html', '_blank'); // Removida a pasta /relatorios/ se o arquivo estiver na raiz
         }
 
         // --- SALVAR/ATUALIZAR ---
@@ -548,7 +548,7 @@
             }
 
             localStorage.setItem('dadosDossie', JSON.stringify(dossieCompleto));
-            window.open('relatorios/relatorio_assistida.html', '_blank');
+            window.open('../relatorios/relatorio_assistida.html', '_blank');
             fecharModalDossie();
         }
         // --- INICIALIZAÇÃO ÚNICA ---
