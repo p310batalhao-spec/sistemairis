@@ -448,7 +448,7 @@
                 }
             } else {
                 console.warn("Sessão expirada ou inválida. Redirecionando...");
-                window.location.replace('login.html');
+                window.location.replace('page/login.html');
                 return;
             }
 
@@ -474,7 +474,7 @@
         function logout() {
             if (confirm("Deseja realmente encerrar a sessão?")) {
                 localStorage.clear();
-                window.location.href = 'login.html';
+                window.location.href = 'page/login.html';
             }
         }
 
