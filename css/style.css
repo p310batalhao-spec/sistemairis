@@ -213,3 +213,16 @@ footer {
     display: flex;
     justify-content: space-around;
 }
+.btn-acionamento {
+    padding: 12px 25px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-acionamento:hover {
+    background-color: #1e8449;
+}

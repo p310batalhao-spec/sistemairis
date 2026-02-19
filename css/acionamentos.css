@@ -1,0 +1,138 @@
+/* Container Principal - Ajustado para alinhar com a NAV lateral */
+.container-tabela {
+    margin: 20px 20px 20px 20px;
+    /* Alinhado com a largura da sua navegação */
+    width: 95%;
+    padding: 25px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-height: 40vh;
+}
+
+/* Tabela */
+.tabela-assistidas {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tabela-assistidas th {
+    background-color: blueviolet;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.tabela-assistidas td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* SIDEBAR - O Coração do Problema */
+.sidebar-cadastro {
+    height: 100%;
+    width: 0;
+    /* Começa fechado */
+    position: fixed;
+    z-index: 9999;
+    /* Valor alto para ficar na frente de tudo */
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-content {
+    min-width: 450px;
+    /* Largura fixa do conteúdo interno */
+    padding: 30px;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid blueviolet;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.btn-edit-tabela {
+    background: none;
+    border: none;
+    color: blueviolet;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.2s;
+}
+
+.btn-edit-tabela:hover {
+    transform: scale(1.2);
+}
+
+/* Container da Tabela com Scroll Interno */
+/* Container com Scroll Interno */
+.tabela-wrapper {
+    max-height: 60vh;
+    /* Altura limite */
+    overflow-y: auto;
+    /* Scroll vertical */
+    margin-top: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+/* Fixar o topo da tabela ao rolar */
+.tabela-assistidas thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: blueviolet;
+}
+
+/* Badges de Status */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    display: inline-block;
+}
+
+.status-ativo {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-encerrando {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.status-encerrada {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* Barra de Filtros */
+.barra-filtros {
+    display: flex;
+    gap: 15px;
+    background: #f4f4f4;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+.barra-filtros input {
+    padding: 8px 12px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
