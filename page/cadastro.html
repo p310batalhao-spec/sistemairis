@@ -61,6 +61,12 @@
         <main class="container-tabela">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 style="color: blueviolet;"><i class="fas fa-users"></i> Gerenciamento de Assistidas</h2>
+                <div style="margin: 20px;">
+                    <button id="btn-adicionar-cadastro" class="btn-adicionar"
+                        style="padding: 10px 20px; cursor: pointer;">
+                        <i class="fas fa-plus"></i> CADASTRAR NOVA ASSISTIDA
+                    </button>
+                </div>
                 <button class="btn-adicionar" onclick="abrirModalDossie()"
                     style="background-color: #27ae60; margin-left: 10px;">
                     <i class="fas fa-id-card"></i> Dossiê da Assistida
@@ -232,7 +238,7 @@
         <h4>Seção de Planejamento, Instrução e Estatística - P3/10ºBPM</h4>
         <h4>Patrulha Maria da Penha - 10ºBPM</h4>
     </footer>
-    <script>
+<script>
         // --- CONFIGURAÇÃO FIREBASE ---
         const firebaseConfig = {
             apiKey: "Sbd198a81a91303317a03499f9fcb146d34e935d4Y",
@@ -245,9 +251,18 @@
 
         // --- VARIÁVEIS GLOBAIS ---
         let dadosLocais = {};
-        let listaFiltradaAtual = []; // Mantém a lista que está na tela no momento
+        let listaFiltradaAtual = [];
 
         // --- FUNÇÕES DE INTERFACE ---
+        
+        // 1. ACRESCENTADO: Vínculo do botão de cadastro para abrir a sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnNovoCadastro = document.getElementById('btn-adicionar-cadastro');
+            if (btnNovoCadastro) {
+                btnNovoCadastro.addEventListener('click', abrirSidebar);
+            }
+        });
+
         function abrirSidebar() {
             const form = document.getElementById('form-cadastro-assistida');
             form.reset();
@@ -274,32 +289,22 @@
         // --- LÓGICA DE CÁLCULO DE STATUS AUTOMÁTICO ---
         function calcularStatusMPU(dataInicio, dataTermino) {
             if (!dataInicio || !dataTermino) return "ATIVO";
-
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0);
             const dataFim = new Date(dataTermino);
             dataFim.setHours(0, 0, 0, 0);
-
             const diffTempo = dataFim - hoje;
             const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
-
-            if (diffDias < 0) {
-                return "MEDIDA ENCERRADA";
-            } else if (diffDias <= 30) {
-                return "MEDIDA ENCERRANDO";
-            } else {
-                return "ATIVO";
-            }
+            if (diffDias < 0) return "MEDIDA ENCERRADA";
+            else if (diffDias <= 30) return "MEDIDA ENCERRANDO";
+            else return "ATIVO";
         }
 
         // --- CARREGAR DADOS DO FIREBASE ---
         function carregarTabela() {
             const tbody = document.getElementById('corpo-tabela-firebase');
-
             db.ref('assistidas').on('value', (snapshot) => {
                 dadosLocais = snapshot.val() || {};
-
-                // Verificação Diária Silenciosa
                 Object.keys(dadosLocais).forEach(id => {
                     const a = dadosLocais[id];
                     const statusCorreto = calcularStatusMPU(a.DATA_INICIO_MPU, a.DATA_TERMINO_MPU);
@@ -307,7 +312,6 @@
                         db.ref(`assistidas/${id}/STATUS`).set(statusCorreto);
                     }
                 });
-
                 aplicarFiltros();
             }, (error) => {
                 console.error("Erro no Firebase:", error);
@@ -320,29 +324,19 @@
             const tbody = document.getElementById('corpo-tabela-firebase');
             const termoBusca = document.getElementById('filtro-nome').value.toLowerCase();
             const statusFiltro = document.getElementById('filtro-status').value;
-
             tbody.innerHTML = "";
-
-            // Transforma os dados do Firebase em Array
             let lista = Object.keys(dadosLocais).map(id => ({ id, ...dadosLocais[id] }));
-
-            // Aplica os filtros
             lista = lista.filter(item => {
                 const matchNome = (item.NOME || "").toLowerCase().includes(termoBusca) || (item.CPF || "").includes(termoBusca);
                 const matchStatus = statusFiltro === "TODOS" || item.STATUS === statusFiltro;
                 return matchNome && matchStatus;
             });
-
-            // Ordenação
             const pesoStatus = { "ATIVO": 1, "MEDIDA ENCERRANDO": 2, "MEDIDA ENCERRADA": 3 };
             lista.sort((a, b) => (pesoStatus[a.STATUS] || 99) - (pesoStatus[b.STATUS] || 99));
-
             listaFiltradaAtual = lista;
-
             lista.forEach(item => {
                 const classe = item.STATUS === 'ATIVO' ? 'status-ativo' :
                     (item.STATUS === 'MEDIDA ENCERRANDO' ? 'status-encerrando' : 'status-encerrada');
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${item.NOME || '-'}</td>
@@ -363,7 +357,6 @@
                 alert("Não há dados para imprimir com os filtros selecionados.");
                 return;
             }
-
             const relatorioInfo = {
                 filtro: document.getElementById('filtro-nome').value || "GERAL",
                 status: document.getElementById('filtro-status').value,
@@ -372,24 +365,21 @@
                 data: new Date().toLocaleString('pt-BR'),
                 dados: listaFiltradaAtual
             };
-
             localStorage.setItem('dadosRelatorio', JSON.stringify(relatorioInfo));
-            window.open('../relatorios/assistidas_geral.html', '_blank'); // Removida a pasta /relatorios/ se o arquivo estiver na raiz
+            window.open('../relatorios/assistidas_geral.html', '_blank');
         }
 
-        // --- SALVAR/ATUALIZAR ---
+        // --- SALVAR/ATUALIZAR NO FIREBASE ---
         document.getElementById('form-cadastro-assistida').addEventListener('submit', function (e) {
             e.preventDefault();
-
             const id = document.getElementById('ID_ASSISTIDA').value;
             const dataIni = document.getElementById('DATA_INICIO_MPU').value;
             const dataFim = document.getElementById('DATA_TERMINO_MPU').value;
-
             const statusCalculado = calcularStatusMPU(dataIni, dataFim);
 
             const dados = {
                 ID_ASSISTIDA: id,
-                NOME: document.getElementById('NOME').value,
+                NOME: document.getElementById('NOME').value.toUpperCase(), // Salva em maiúsculo para padrão
                 RG: document.getElementById('RG').value,
                 CPF: document.getElementById('CPF').value,
                 IDADE: document.getElementById('IDADE').value,
@@ -423,22 +413,16 @@
                 .catch((error) => alert("Erro ao salvar: " + error));
         });
 
-        // --- PREENCHER PARA EDITAR (MELHORADO) ---
+        // --- PREENCHER PARA EDITAR ---
         async function preencherParaEditar(id) {
             try {
-                // Garantimos que estamos pegando a versão mais recente do Firebase para editar
                 const snap = await db.ref(`assistidas/${id}`).once('value');
                 const a = snap.val();
-                if (!a) {
-                    alert("Erro ao localizar dados da assistida.");
-                    return;
-                }
+                if (!a) return alert("Erro ao localizar dados.");
 
-                // Primeiro, abrimos a barra (que já faz o reset)
                 document.getElementById('sidebar-cadastro').style.width = "450px";
                 document.getElementById('titulo-sidebar').innerText = "Editar Assistida";
 
-                // Preenchemos os campos após o reset do abrirSidebar
                 document.getElementById('ID_ASSISTIDA').value = a.ID_ASSISTIDA || id;
                 document.getElementById('NOME').value = a.NOME || "";
                 document.getElementById('RG').value = a.RG || "";
@@ -464,119 +448,80 @@
                 document.getElementById('EMAIL').value = a.EMAIL || "";
                 document.getElementById('UPLOAD_PDF').value = a.UPLOAD_PDF || "";
                 document.getElementById('PONTO_REF').value = a.PONTO_REF || "";
-
-            } catch (error) {
-                console.error("Erro ao preencher edição:", error);
-            }
+            } catch (error) { console.error(error); }
         }
 
-        //FUNÇÕES DO DOSSIÊ
-        // Função para abrir o modal e já carregar a lista de assistidas
+        // --- FUNÇÕES DO DOSSIÊ ---
         async function abrirModalDossie() {
             const modal = document.getElementById('modal-dossie');
             const select = document.getElementById('select-dossie');
-
             modal.style.display = 'flex';
             select.innerHTML = '<option value="">Aguarde, carregando...</option>';
-
             try {
                 const snapshot = await db.ref('assistidas').once('value');
                 select.innerHTML = '<option value="">-- Selecione uma Assistida --</option>';
-
                 const assistidas = [];
                 snapshot.forEach(child => {
-                    assistidas.push({
-                        id: child.key,
-                        nome: child.val().NOME.toUpperCase()
-                    });
+                    assistidas.push({ id: child.key, nome: child.val().NOME.toUpperCase() });
                 });
-
-                // Ordenar por nome antes de colocar no select
                 assistidas.sort((a, b) => a.nome.localeCompare(b.nome));
-
                 assistidas.forEach(a => {
                     select.innerHTML += `<option value="${a.id}">${a.nome}</option>`;
                 });
-            } catch (error) {
-                console.error("Erro ao carregar lista:", error);
-                select.innerHTML = '<option value="">Erro ao carregar dados</option>';
-            }
+            } catch (error) { console.error(error); }
         }
 
         function fecharModalDossie() {
             document.getElementById('modal-dossie').style.display = 'none';
         }
 
-        // Função de gerar relatório ajustada para usar o ID do Select
         async function prepararDossie() {
             const assistidaId = document.getElementById('select-dossie').value;
             if (!assistidaId) return alert("Por favor, selecione uma assistida.");
-
             const snapAssist = await db.ref('assistidas').child(assistidaId).once('value');
             const assistidaEncontrada = snapAssist.val();
             if (!assistidaEncontrada) return alert("Erro ao recuperar dados.");
-
-            // Nós a serem pesquisados
             const nos = ['TermoConsentimento', 'certidoes', 'emergencia', 'encerramento'];
-            const dossieCompleto = {
-                perfil: assistidaEncontrada,
-                registros: {}
-            };
-
+            const dossieCompleto = { perfil: assistidaEncontrada, registros: {} };
             for (const no of nos) {
                 const snap = await db.ref(no).once('value');
                 dossieCompleto.registros[no] = [];
-
                 snap.forEach(child => {
                     const dado = child.val();
-
-                    // LÓGICA DE VÍNCULO ESPECÍFICA POR NÓ
                     if (no === 'emergencia') {
-                        // No nó emergencia, o vínculo é pelo campo ASSISTIDA_LINK
-                        if (dado.ASSISTIDA_LINK === assistidaId) {
-                            dossieCompleto.registros[no].push(dado);
-                        }
+                        if (dado.ASSISTIDA_LINK === assistidaId) dossieCompleto.registros[no].push(dado);
                     } else {
-                        // Nos outros nós, mantém o vínculo por ID ou Nome
-                        if (dado.NOME === assistidaId ||
-                            dado["NOME DA REPESENTANTE"] === assistidaId ||
-                            dado.NOME === assistidaEncontrada.NOME) {
+                        if (dado.NOME === assistidaId || dado["NOME DA REPESENTANTE"] === assistidaId || dado.NOME === assistidaEncontrada.NOME) {
                             dossieCompleto.registros[no].push(dado);
                         }
                     }
                 });
             }
-
             localStorage.setItem('dadosDossie', JSON.stringify(dossieCompleto));
             window.open('../relatorios/relatorio_assistida.html', '_blank');
             fecharModalDossie();
         }
-        // --- INICIALIZAÇÃO ÚNICA ---
+
+        // --- INICIALIZAÇÃO ÚNICA (RELÓGIO E LOGIN) ---
         function inicializarSistema() {
             const h3Unidade = document.getElementById('unidade');
             const unidadeSalva = localStorage.getItem('usuarioUnidade');
-
             if (unidadeSalva && unidadeSalva !== "undefined" && unidadeSalva !== "null") {
                 if (h3Unidade) h3Unidade.innerText = unidadeSalva;
             } else {
                 window.location.replace('login.html');
                 return;
             }
-
             const dateTimeSpan = document.getElementById('current-date-time');
             setInterval(() => {
                 const agora = new Date();
-                const data = agora.toLocaleDateString('pt-BR');
-                const hora = agora.toLocaleTimeString('pt-BR');
-                if (dateTimeSpan) dateTimeSpan.innerText = data + " | " + hora;
+                if (dateTimeSpan) dateTimeSpan.innerText = agora.toLocaleDateString('pt-BR') + " | " + agora.toLocaleTimeString('pt-BR');
             }, 1000);
-
             const nome = localStorage.getItem('usuarioNome');
             if (nome) {
                 const elNome = document.getElementById('nome-operador');
                 if (elNome) elNome.innerText = nome;
             }
-
             carregarTabela();
         }
 
