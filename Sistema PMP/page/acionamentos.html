@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema PMP/PMAL | ACIONAMENTOS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/stylesindex.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/acionamentos.css">
+    <link rel="shortcut icon" href="../img/favicon.ico" type="image/x-icon">
+
+</head>
+
+<body>
+    <audio id="sireneAudio">
+        <source src="https://github.com/p310batalhao-spec/AppScript-Audios/raw/refs/heads/main/ambulance-siren.mp3"
+            type="audio/mpeg">
+    </audio>
+
+    <header>
+        <section class="cabecalho-geral"
+            style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="header-info-left">
+                <img class="brasao" src="../img/brasao.png" alt="brasao">
+                <div class="cabecalho">
+                    <h1>CENTRAL DE MONITORAMENTO ÍRIS</h1>
+                    <h3>POLÍCIA MILITAR DE ALAGOAS</h3>
+                    <h3>CENTRAL DE OPERAÇÕES DA POLÍCIA MILITAR - COPOM</h3>
+                    <h3 id="unidade">--</h3>
+                </div>
+            </div>
+
+            <div class="header-info-right" style="text-align: right; padding-right: 50px;">
+                <div style="color: blueviolet; font-weight: bold; font-size: 1rem;">
+                    <i class="fas fa-user-shield"></i> Operador: <span id="graduacao-operador"></span> <span
+                        id="nome-operador">---</span>
+                </div>
+                <div id="relogio"
+                    style="color: #555; font-weight: bold; font-size: 1.1rem; margin-top: 5px; margin-right: 30px ;">
+                    <span id="current-date-time"></span>
+                </div>
+            </div>
+        </section>
+    </header>
+    </header>
+
+    <main>
+        <section class="pagecomplete">
+            <nav class="navegacao">
+                <div class="nav-links">
+                    <a href="../index.html" class="active">
+                        <img width="30" height="30" src="https://img.icons8.com/material-outlined/24/home--v2.png"
+                            alt="home" />
+                        <p>Home</p>
+                    </a>
+                    <a href="../page/fiscalizacaohome.html">
+                        <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/policeman-female.png"
+                            alt="policeman-female" />
+                        <p>Fiscalização</p>
+                    </a>
+                </div>
+
+                <a href="javascript:void(0)" onclick="logout()"
+                    style="color: #d9534f; border-top: 1px solid #eee; padding-top: 15px;">
+                    <i class="fas fa-sign-out-alt" style="font-size: 24px;"></i>
+                    <p>Sair</p>
+                </a>
+            </nav>
+            <div class="container-tabela">
+                <div class="header-tabela">
+                    <h2 style="color: blueviolet;"><i style="color: blueviolet;" class="fas fa-file-invoice"></i>
+                        Acionamentos do Botão do Pânico</h2>
+                    <div class="barra-filtros">
+                        <input type="text" id="inputBusca" onkeyup="filtrarTabela()"
+                            placeholder="Buscar por nome da assistida...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+
+                <main class="container-tabela">
+                    <div class="tabela-wrapper">
+                        <table class="tabela-assistidas" id="tabela-acionamentos">
+                            <thead>
+                                <tr>
+                                    <th>DATA/HORA ACIONAMENTO</th>
+                                    <th>NOME DA ASSISTIDA</th>
+                                    <th>CIDADE</th>
+                                    <th>LOCALIZAÇÃO</th>
+                                    <th>DATA/HORA RESPOSTA</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabela">
+                            </tbody>
+                        </table>
+                    </div>
+                </main>
+            </div>
+            </div>
+        </section>
+    </main>
+    </section>
+    </main>
+    <footer>
+        <h4>Seção de Planejamento, Instrução e Estatística - P3/10ºBPM</h4>
+        <h4>Patrulha Maria da Penha - 10ºBPM</h4>
+    </footer>
+
+    <script>
+        const FIREBASE_URL = "https://botpanico-6346c-default-rtdb.firebaseio.com/emergencia.json";
+
+        async function carregarAcionamentos() {
+            try {
+                // 1. Busca os dados simultaneamente (Acionamentos e Assistidas)
+                const [resEmergencia, resAssistidas] = await Promise.all([
+                    fetch(FIREBASE_URL),
+                    fetch("https://botpanico-6346c-default-rtdb.firebaseio.com/assistidas.json")
+                ]);
+
+                const acionamentosDados = await resEmergencia.json();
+                const assistidasMap = await resAssistidas.json() || {};
+
+                const tbody = document.getElementById('corpoTabela');
+                tbody.innerHTML = "";
+
+                if (!acionamentosDados) {
+                    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Nenhum acionamento recente.</td></tr>";
+                    return;
+                }
+
+                // 2. Transformamos em array para inverter a ordem (mais recentes primeiro)
+                const chaves = Object.keys(acionamentosDados).reverse();
+
+                chaves.forEach(idFirebase => {
+                    const item = acionamentosDados[idFirebase];
+
+                    // 3. Captura o ASSISTIDA_LINK (que é o ID da assistida)
+                    const idAssistida = item.ASSISTIDA_LINK;
+                    const dadosCadastrais = assistidasMap[idAssistida];
+                    const nomeExibicao = dadosCadastrais ? dadosCadastrais.NOME : (item.NOME || "Não identificado");
+
+                    const tr = document.createElement('tr');
+                    tr.className = "linha-clicavel";
+
+                    // 4. O SEGREDO: Criamos uma variável de escopo local para "congelar" os dados desta linha
+                    const dadosDestaLinha = {
+                        ...item,
+                        NOME_REAL: nomeExibicao,
+                        ID_FIREBASE: idFirebase,
+                        DADOS_ASSISTIDA: dadosCadastrais
+                    };
+
+                    // 5. Atribuímos o clique garantindo que ele use os 'dadosDestaLinha'
+                    tr.onclick = function () {
+                        localStorage.removeItem('detalhe_acionamento');
+                        localStorage.setItem('detalhe_acionamento', JSON.stringify(dadosDestaLinha));
+
+                        console.log("Abrindo relatório de: " + nomeExibicao + " (ID: " + idFirebase + ")");
+                        window.open('../relatorios/relatorio_acionamento.html', '_blank');
+                    };
+
+                    // 6. Preenchimento visual da linha
+                    tr.innerHTML = `
+                <td>${item.DATA || item.DATA_HORA_ACIO || '---'}</td>
+                <td style="font-weight:bold; color: #2c3e50; text-decoration: underline; cursor: pointer;">
+                    ${nomeExibicao}
+                </td>
+                <td>${item.CIDADE || item.UNIDADE || '---'}</td>
+                <td>
+                    <i class="fas fa-location-dot" style="color:red"></i> 
+                    ${item.LOCALIZACAO || item.COORDENADA_GPS || 'Ver Detalhes'}
+                </td>
+                <td>
+                    ${item.DATA_HORA_RESPOSTA
+                            ? item.DATA_HORA_RESPOSTA
+                            : '<span style="color: red; font-weight: bold; animation: blinker 1s linear infinite;">PENDENTE</span>'}
+                </td>
+                <td><span class="badge-emergencia">ACIONADO</span></td>
+            `;
+
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error("Erro ao processar acionamentos:", error);
+            }
+        }
+        // Sua função de filtro permanece idêntica, pois já funciona bem
+        function filtrarTabela() {
+            const input = document.getElementById("inputBusca");
+            const filter = input.value.toUpperCase();
+            const tr = document.getElementById("corpoTabela").getElementsByTagName("tr");
+
+            for (let i = 0; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName("td")[1];
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    tr[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+                }
+            }
+        }
+
+        function inicializarSistema() {
+            const unidadeSalva = localStorage.getItem('usuarioUnidade');
+            if (!unidadeSalva) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            document.getElementById('unidade').innerText = unidadeSalva;
+            document.getElementById('nome-operador').innerText = localStorage.getItem('usuarioNome') || 'Operador';
+
+            // Relógio
+            setInterval(() => {
+                const agora = new Date();
+                document.getElementById('current-date-time').innerText =
+                    agora.toLocaleDateString('pt-BR') + " | " + agora.toLocaleTimeString('pt-BR');
+            }, 1000);
+
+            carregarAcionamentos();
+        }
+
+        function logout() {
+            if (confirm("Deseja encerrar a sessão?")) {
+                localStorage.clear();
+                window.location.href = '../page/login.html';
+            }
+        }
+
+        window.onload = inicializarSistema;
+        // Atualiza automático a cada 30s
+        setInterval(carregarAcionamentos, 30000);
+    </script>
+</body>
+
+</html>
