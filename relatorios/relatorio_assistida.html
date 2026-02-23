@@ -108,6 +108,7 @@
                     <th>BOU/COP</th>
                     <th>FORMA DE CONTATO</th>
                     <th>ALTERAÇÕES RELATADAS</th>
+                    <th>RELATO</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -180,6 +181,7 @@
             <td>${c.NUMERO_BOU || c.BOU || '-'}</td>
             <td>${formaContato}</td>
             <td>${c.ALTERACOES || 'Sem Alterações'}</td>
+            <td>${c.RELATO || '-'}</td>
         </tr>`;
                 });
             } else {
